@@ -1,6 +1,6 @@
 <?php
 
-namespace Sandertv\BlockGenerator\generators;
+namespace BlockHorizons\BlockGenerator\generators;
 
 use pocketmine\level\generator\Generator;
 

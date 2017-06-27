@@ -1,10 +1,12 @@
 <?php
 
-namespace Sandertv\BlockGenerator;
+namespace BlockHorizons\BlockGenerator;
 
 use pocketmine\plugin\PluginBase;
 
 class Loader extends PluginBase {
+
+	private $config;
 	
 	public function onEnable() {
 		
