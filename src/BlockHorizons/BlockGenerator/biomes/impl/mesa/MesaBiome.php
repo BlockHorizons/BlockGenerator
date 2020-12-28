@@ -131,7 +131,7 @@ class MesaBiome extends CoveredBiome {
     public function getHeightOffset(int $x, int $z) : int {
         $n = $this->moundNoise->noise2D($x, $z, true);
         $a = self::minHill();
-        return ($n > $a && $n < $a + 0.2) ? (int) (($n - $a) * 5 * $moundHeight) : $n < $a + 0.1 ? 0 : $moundHeight;
+        return ($n > $a && $n < $a + 0.2) ? (int)(($n - $a) * 5 * $this->moundHeight) : ($n < $a + 0.1 ? 0 : $this->moundHeight);
     }
 
     protected function minHill() : float {

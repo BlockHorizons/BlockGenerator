@@ -4,17 +4,16 @@ namespace BlockHorizons\BlockGenerator\object;
 use BlockHorizons\BlockGenerator\math\FacingHelper;
 use pocketmine\block\Block;
 
+use pocketmine\block\Wood2;
 use pocketmine\level\ChunkManager;
-use pocketmine\level\generator\object\Tree;
-use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\utils\Random;
 
-class AcaciaTree extends Tree {
+class AcaciaTree extends CustomTree {
 
-	public function __construct() {
-		parent::__construct(Block::WOOD2, Block::LEAVES2, \pocketmine\block\Wood2::ACACIA);
-	}
+    public $trunkBlock = Block::WOOD2;
+    public $leafBlock = Block::LEAVES2;
+    public $blockMeta = Wood2::ACACIA;
 	
 	public function placeObject(ChunkManager $level, int $x, int $y, int $z, Random $rand) : void {
         $i = $rand->nextBoundedInt(3) + $rand->nextBoundedInt(3) + 5;
@@ -58,7 +57,7 @@ class AcaciaTree extends Tree {
                     
                 	$level->setBlockIdAt($x, $y - 1, $z, Block::DIRT);
 
-                    $face = Facing::HORIZONTAL[$rand->nextBoundedInt(4)];
+                    $face = FacingHelper::HORIZONTAL[$rand->nextBoundedInt(4)];
                     $k2 = $i - $rand->nextBoundedInt(4) - 1;
                     $l2 = 3 - $rand->nextBoundedInt(3);
                     $i3 = $x;
@@ -109,7 +108,7 @@ class AcaciaTree extends Tree {
                     $this->placeLeafAt($level, $blockpos2->north(2));
                     $i3 = $x;
                     $j1 = $z;
-                    $face1 = Facing::HORIZONTAL[$rand->nextBoundedInt(4)];
+                    $face1 = FacingHelper::HORIZONTAL[$rand->nextBoundedInt(4)];
 
                     if ($face1 != $face) {
                         $l3 = $k2 - $rand->nextBoundedInt(2) - 1;

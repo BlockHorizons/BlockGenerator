@@ -70,11 +70,11 @@ class BlockGenerator extends CustomGenerator {
 
     public function __construct(array $options = []){
 
-        $seed = time(); // some arbitrary value ;/
+        $seed = 1337; // some arbitrary value ;/
         $this->settings = ["seed" => $seed];
         $this->seed = $this->settings["seed"];
         // wtf am I doing here ? ^ xD
-        $this->settings["populate"] = false;
+        $this->settings["populate"] = true;
 
 		for ($i = -2; $i <= 2; ++$i) {
             for ($j = -2; $j <= 2; ++$j) {
@@ -334,11 +334,11 @@ class BlockGenerator extends CustomGenerator {
 //        $this->cavePop->populate($this->level, $chunkX, $chunkZ, $this->random, $chunk);
 //        $this->ravinePop->populate($this->level, $chunkX, $chunkZ, $this->random, $chunk);
 //
-//        //populate chunk
-//        foreach ($this->generationPopulators as $populator) {
-//            // add posibility to exclude populator using $settings variable # TODO
-//            $populator->populate($this->level, $chunkX, $chunkZ, $this->random, $chunk);
-//        }
+        //populate chunk
+        foreach ($this->generationPopulators as $populator) {
+            // add posibility to exclude populator using $settings variable # TODO
+            $populator->populate($this->level, $chunkX, $chunkZ, $this->random, $chunk);
+        }
 	}
 
 	public function populateChunk(int $chunkX, int $chunkZ) : void {

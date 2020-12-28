@@ -2,7 +2,6 @@
 namespace BlockHorizons\BlockGenerator\object;
 
 use pocketmine\block\Block;
-use pocketmine\block\Vine;
 use pocketmine\level\ChunkManager;
 use pocketmine\math\Vector3;
 use pocketmine\utils\Random;

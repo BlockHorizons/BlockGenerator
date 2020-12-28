@@ -10,11 +10,6 @@ use pocketmine\utils\Random;
 abstract class HugeTree extends CustomTree {
 
     /**
-     * The base height of the tree
-     */
-    protected $treeHeight;
-
-    /**
      * Sets the metadata for the wood blocks used
      */
     protected $woodMetadata;

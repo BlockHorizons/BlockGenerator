@@ -13,7 +13,6 @@ use BlockHorizons\BlockGenerator\noise\SimplexF;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\level\generator\GeneratorManager;
-use pocketmine\math\Facing;
 use pocketmine\math\Vector2;
 use pocketmine\plugin\PluginBase;
 
@@ -22,7 +21,7 @@ class Loader extends PluginBase implements Listener
 
     private $config;
 
-    public function onEnable()
+    public function onLoad()
     {
         CustomBiome::init();
 
@@ -34,7 +33,9 @@ class Loader extends PluginBase implements Listener
         $this->getServer()->generateLevel("rblock", 1338, BlockGenerator::class, []);
         $this->getServer()->loadLevel("rblock");
         $level = $this->getServer()->getLevelByName("rblock");
+    }
 
+    public function onEnable() {
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
 
 //         $this->makeMap(1338, 100);

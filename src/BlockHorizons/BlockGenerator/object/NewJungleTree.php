@@ -168,9 +168,9 @@ class NewJungleTree extends CustomTree {
 
                     if ($rand->nextBoundedInt(5) === 0 && $i > 5) {
                         for ($l3 = 0; $l3 < 2; ++$l3) {
-                            foreach (Facing::HORIZONTAL as $face) {
+                            foreach (FacingHelper::HORIZONTAL as $face) {
                                 if ($rand->nextBoundedInt(4 - $l3) === 0) {
-                                    $enumfacing1 = Facing::opposite($face);
+                                    $enumfacing1 = FacingHelper::opposite($face);
                                     $this->placeCocoa($worldIn, $rand->nextBoundedInt(3), $position->add(FacingHelper::xOffset($enumfacing1), $i - 5 + $l3, FacingHelper::zOffset($enumfacing1)), $face);
                                 }
                             }

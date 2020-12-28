@@ -4,22 +4,17 @@ namespace BlockHorizons\BlockGenerator\object;
 use BlockHorizons\BlockGenerator\math\FacingHelper;
 use pocketmine\block\Block;
 
+use pocketmine\block\Wood2;
 use pocketmine\level\ChunkManager;
-use pocketmine\level\generator\object\Tree;
-use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\utils\Random;
 
 class DarkOakTree extends CustomTree {
 
-    public function __construct() {
-
-    }
-
     /**
      * The metadata value of the wood to use in tree generation.
      */
-    protected $metaWood = \pocketmine\block\Wood2::DARK_OAK;
+    protected $metaWood = Wood2::DARK_OAK;
 
     /**
      * The metadata value of the leaves to use in tree generation.
@@ -45,7 +40,7 @@ class DarkOakTree extends CustomTree {
                 $this->setDirtAt($level, $blockpos->east());
                 $this->setDirtAt($level, $blockpos->south());
                 $this->setDirtAt($level, $blockpos->south()->east());
-                $face = Facing::HORIZONTAL[$rand->nextBoundedInt(3)];
+                $face = FacingHelper::HORIZONTAL[$rand->nextBoundedInt(3)];
                 $i1 = $i - $rand->nextBoundedInt(4);
                 $j1 = 2 - $rand->nextBoundedInt(3);
                 $k1 = $j;
@@ -74,17 +69,15 @@ class DarkOakTree extends CustomTree {
                 for ($i3 = -2; $i3 <= 0; ++$i3) {
                     for ($l3 = -2; $l3 <= 0; ++$l3) {
                         $k4 = -1;
+                        place_leaves:
                         $this->placeLeafAt($level, $k1 + $i3, $i2 + $k4, $l1 + $l3);
                         $this->placeLeafAt($level, 1 + $k1 - $i3, $i2 + $k4, $l1 + $l3);
                         $this->placeLeafAt($level, $k1 + $i3, $i2 + $k4, 1 + $l1 - $l3);
                         $this->placeLeafAt($level, 1 + $k1 - $i3, $i2 + $k4, 1 + $l1 - $l3);
 
-                        if (($i3 > -2 || $l3 > -1) && ($i3 != -1 || $l3 != -2)) {
+                        if (($i3 > -2 || $l3 > -1) && ($i3 != -1 || $l3 != -2) && $k4 < 0) {
                             $k4 = 1;
-                            $this->placeLeafAt($level, $k1 + $i3, $i2 + $k4, $l1 + $l3);
-                            $this->placeLeafAt($level, 1 + $k1 - $i3, $i2 + $k4, $l1 + $l3);
-                            $this->placeLeafAt($level, $k1 + $i3, $i2 + $k4, 1 + $l1 - $l3);
-                            $this->placeLeafAt($level, 1 + $k1 - $i3, $i2 + $k4, 1 + $l1 - $l3);
+                            goto place_leaves;
                         }
                     }
                 }
@@ -169,7 +162,7 @@ class DarkOakTree extends CustomTree {
 
     protected function placeLogAt(ChunkManager $worldIn, Vector3 $pos) : void {
         if ($this->canOverride(Block::get($worldIn->getBlockIdAt($pos->getX(), $pos->getY(), $pos->getZ())))) {
-            $this->setBlockAndNotifyAdequately($worldIn, $pos, Block::get(Block::LOG2, \pocketmine\block\Wood2::DARK_OAK));
+            $this->setBlockAndNotifyAdequately($worldIn, $pos, Block::get(Block::LOG2, Wood2::DARK_OAK));
         }
     }
 

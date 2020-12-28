@@ -20,6 +20,10 @@ class BigSpruceTree extends SpruceTree {
         $this->baseLeafRadius = $baseLeafRadius;
     }
 
+    public function canOverride(Block $block) : bool {
+        return isset($this->overridable[$block->getId()]);
+    }
+
     public function placeObject(ChunkManager $level, int $x, int $y, int $z, Random $random) : void {
         $this->treeHeight = $random->nextBoundedInt(15) + 20;
 
@@ -41,7 +45,8 @@ class BigSpruceTree extends SpruceTree {
                 for ($zz = 0; $zz < $radius; $zz++) {
                     $block = $level->getBlockIdAt($x, $y + $yy, $z);
                     if ($this->canOverride(Block::get($block))) {
-                        $level->setBlockIdAt($x + $xx, $y + $yy, $z + $zz, $this->trunkBlock, $this->blockMeta);
+                        $level->setBlockIdAt($x + $xx, $y + $yy, $z + $zz, $this->trunkBlock);
+                        $level->setBlockDataAt($x + $xx, $y + $yy, $z + $zz, $this->type);
                     }
                 }
             }
@@ -65,7 +70,8 @@ class BigSpruceTree extends SpruceTree {
                     }
 
                     if (PopulatorHelpers::isNonSolid($level->getBlockIdAt($xx, $yyy, $zz))) {
-                        $level->setBlockIdAt($xx, $yyy, $zz, Block::LEAVES, $this->blockMeta);
+                        $level->setBlockIdAt($xx, $yyy, $zz, $this->leafBlock);
+                        $level->setBlockDataAt($xx, $yyy, $zz, $this->type);
                     }
                 }
             }
