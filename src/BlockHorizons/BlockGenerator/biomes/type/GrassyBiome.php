@@ -1,17 +1,18 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\biomes\type;
 
-use BlockHorizons\BlockGenerator\populator\DoublePlantPopulator;
 use BlockHorizons\BlockGenerator\populator\FlowerPopulator;
 use BlockHorizons\BlockGenerator\populator\GrassPopulator;
 use pocketmine\block\Block;
-use pocketmine\block\DoublePlant;
 use pocketmine\block\Flower;
 use pocketmine\level\generator\populator\TallGrass;
 
-abstract class GrassyBiome extends CoveredBiome {
+abstract class GrassyBiome extends CoveredBiome
+{
 
-	public function __construct() {
+    public function __construct()
+    {
         $grass = new GrassPopulator();
         $grass->setBaseAmount(30);
         $this->addPopulator($grass);
@@ -31,11 +32,13 @@ abstract class GrassyBiome extends CoveredBiome {
         $this->addPopulator($flower);
     }
 
-    public function getSurfaceBlock(int $y) : int {
+    public function getSurfaceBlock(int $y): int
+    {
         return Block::GRASS;
     }
 
-    public function getGroundBlock(int $y) : int {
+    public function getGroundBlock(int $y): int
+    {
         return Block::DIRT;
     }
 

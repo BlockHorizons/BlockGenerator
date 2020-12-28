@@ -1,18 +1,21 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\biomes\type;
 
 use BlockHorizons\BlockGenerator\biomes\CustomBiome;
 use pocketmine\block\Block;
 
-abstract class CoveredBiome extends CustomBiome {
-	
-	/**
+abstract class CoveredBiome extends CustomBiome
+{
+
+    /**
      * A single block placed on top of the surface blocks
      *
      * @param int $y
      * @return cover block
      */
-    public function getCoverBlock(int $y) : int {
+    public function getCoverBlock(int $y): int
+    {
         return Block::AIR;
     }
 
@@ -25,7 +28,8 @@ abstract class CoveredBiome extends CustomBiome {
      * @param y y
      * @return surface depth
      */
-    public function getSurfaceDepth(int $y) : int {
+    public function getSurfaceDepth(int $y): int
+    {
         return 1;
     }
 
@@ -35,7 +39,7 @@ abstract class CoveredBiome extends CustomBiome {
      * @param y y
      * @return surface block
      */
-    public abstract function getSurfaceBlock(int $y) : int;
+    public abstract function getSurfaceBlock(int $y): int;
 
     /**
      * The metadata of the surface block
@@ -43,7 +47,8 @@ abstract class CoveredBiome extends CustomBiome {
      * @param y y
      * @return surface meta
      */
-    public function getSurfaceMeta(int $y) : int {
+    public function getSurfaceMeta(int $y): int
+    {
         return 0;
     }
 
@@ -55,7 +60,8 @@ abstract class CoveredBiome extends CustomBiome {
      * @param y y
      * @return ground depth
      */
-    public function getGroundDepth(int $y) : int {
+    public function getGroundDepth(int $y): int
+    {
         return 4;
     }
 
@@ -65,7 +71,7 @@ abstract class CoveredBiome extends CustomBiome {
      * @param y y
      * @return ground block
      */
-    public abstract function getGroundBlock(int $y) : int;
+    public abstract function getGroundBlock(int $y): int;
 
     /**
      * The metadata of the ground block
@@ -73,7 +79,8 @@ abstract class CoveredBiome extends CustomBiome {
      * @param y y
      * @return ground meta
      */
-    public function getGroundMeta(int $y) : int {
+    public function getGroundMeta(int $y): int
+    {
         return 0;
     }
 
@@ -82,7 +89,8 @@ abstract class CoveredBiome extends CustomBiome {
      *
      * @return stone block
      */
-    public function getStoneBlock() : int {
+    public function getStoneBlock(): int
+    {
         return Block::STONE;
     }
 
@@ -95,7 +103,8 @@ abstract class CoveredBiome extends CustomBiome {
      * @param x x
      * @param z z
      */
-    public function preCover(int $x, int $z) {
+    public function preCover(int $x, int $z)
+    {
 
     }
 

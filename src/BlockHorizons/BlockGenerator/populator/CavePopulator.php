@@ -1,8 +1,8 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\populator;
 
 use BlockHorizons\BlockGenerator\biomes\CustomBiome;
-use BlockHorizons\BlockGenerator\biomes\type\CoveredBiome;
 use BlockHorizons\BlockGenerator\math\CustomRandom;
 use pocketmine\block\Block;
 use pocketmine\level\ChunkManager;
@@ -10,33 +10,32 @@ use pocketmine\level\format\Chunk;
 use pocketmine\level\generator\populator\Populator;
 use pocketmine\utils\Random;
 
-class CavePopulator extends Populator {
+class CavePopulator extends Populator
+{
 
-    protected $checkAreaSize = 8;
-
-    private $random;
-
-    public static $caveRarity = 99;//7
-    public static $caveFrequency = 80;//40
-    public static $caveMinAltitude = 8;
-    public static $caveMaxAltitude = 67;
-    public static $individualCaveRarity = 1;//25
+public static $caveRarity = 99;
+public static $caveFrequency = 80;
+    public static $caveMinAltitude = 8;//7
+        public static $caveMaxAltitude = 67;//40
+public static $individualCaveRarity = 1;
     public static $caveSystemFrequency = 1;
-    public static $caveSystemPocketChance = 0;
+        public static $caveSystemPocketChance = 0;//25
     public static $caveSystemPocketMinSize = 0;
     public static $caveSystemPocketMaxSize = 4;
     public static $evenCaveDistribution = false;
-
     public $worldHeightCap = 128;
-
+    protected $checkAreaSize = 8;
     protected $worldLong1, $worldLong2;
+    private $random;
 
-    public function __construct(Random $random) {
+    public function __construct(Random $random)
+    {
         $worldLong1 = $random->nextLong();
         $worldLong2 = $random->nextLong();
     }
 
-    public function populate(ChunkManager $level, int $chunkX, int $chunkZ, Random $random) : void {
+    public function populate(ChunkManager $level, int $chunkX, int $chunkZ, Random $random): void
+    {
         $this->random = new CustomRandom($random->getSeed());
 
         $chunk = $level->getChunk($chunkX, $chunkZ);
@@ -51,11 +50,60 @@ class CavePopulator extends Populator {
         }
     }
 
-    protected function generateLargeCaveNode($seed, Chunk $chunk, float $x, float $y, float $z) : void {
+    protected function generateChunk(int $chunkX, int $chunkZ, Chunk $generatingChunkBuffer): void
+    {
+        $i = $this->random->nextBoundedInt($this->random->nextBoundedInt($this->random->nextBoundedInt(self::$caveFrequency) + 1) + 1);
+
+        if (self::$evenCaveDistribution) $i = self::$caveFrequency;
+        if ($this->random->nextBoundedInt(100) >= self::$caveRarity) $i = 0;
+
+        for ($j = 0; $j < $i; $j++) {
+            $x = $chunkX * 16 + $this->random->nextBoundedInt(16);
+
+            $y = 0.00;
+
+            if (self::$evenCaveDistribution) {
+                $y = self::numberInRange($random, self::$caveMinAltitude, self::$caveMaxAltitude);
+            } else {
+                $y = $this->random->nextBoundedInt($this->random->nextBoundedInt(self::$caveMaxAltitude - self::$caveMinAltitude + 1) + 1) + self::$caveMinAltitude;
+            }
+
+            $z = $chunkZ * 16 + $this->random->nextBoundedInt(16);
+
+            $count = self::$caveSystemFrequency;
+            $largeCaveSpawned = false;
+            if ($this->random->nextBoundedInt(100) <= self::$individualCaveRarity) {
+                $this->generateLargeCaveNode($this->random->nextLong(), $generatingChunkBuffer, $x, $y, $z);
+                $largeCaveSpawned = true;
+            }
+
+            if (($largeCaveSpawned) || ($this->random->nextBoundedInt(100) <= self::$caveSystemPocketChance - 1)) {
+                $count += self::numberInRange($this->random, self::$caveSystemPocketMinSize, self::$caveSystemPocketMaxSize);
+            }
+            while ($count > 0) {
+                $count--;
+
+                $f1 = $this->random->nextFloat() * 3.141593 * 2.0;
+                $f2 = ($this->random->nextFloat() - 0.5) * 2.0 / 8.0;
+                $f3 = $this->random->nextFloat() * 2.0 + $this->random->nextFloat();
+
+                $this->generateCaveNode($this->random->nextLong(), $generatingChunkBuffer, $x, $y, $z, $f3, $f1, $f2, 0, 0, 1.0);
+            }
+        }
+    }
+
+    public static function numberInRange(Random $random, int $min, int $max): int
+    {
+        return $min + $random->nextBoundedInt($max - $min + 1);
+    }
+
+    protected function generateLargeCaveNode($seed, Chunk $chunk, float $x, float $y, float $z): void
+    {
         $this->generateCaveNode($seed, $chunk, $x, $y, $z, 1.0 + $this->random->nextFloat() * 6.0, 0.0, 0.0, -1, -1, 0.5);
     }
 
-    protected function generateCaveNode($seed, Chunk $chunk, float $x, float $y, float $z, float $radius, float $angelOffset, float $angel, int $angle, int $maxAngle, float $scale) : void {
+    protected function generateCaveNode($seed, Chunk $chunk, float $x, float $y, float $z, float $radius, float $angelOffset, float $angel, int $angle, int $maxAngle, float $scale): void
+    {
         $chunkX = $chunk->getX();
         $chunkZ = $chunk->getZ();
 
@@ -223,51 +271,6 @@ class CavePopulator extends Populator {
                 break;
             }
         }
-    }
-
-    protected function generateChunk(int $chunkX, int $chunkZ, Chunk $generatingChunkBuffer) : void {
-        $i = $this->random->nextBoundedInt($this->random->nextBoundedInt($this->random->nextBoundedInt(self::$caveFrequency) + 1) + 1);
-
-        if (self::$evenCaveDistribution) $i = self::$caveFrequency;
-        if ($this->random->nextBoundedInt(100) >= self::$caveRarity) $i = 0;
-
-        for ($j = 0; $j < $i; $j++) {
-            $x = $chunkX * 16 + $this->random->nextBoundedInt(16);
-
-            $y = 0.00;
-
-            if (self::$evenCaveDistribution) {
-                $y = self::numberInRange($random, self::$caveMinAltitude, self::$caveMaxAltitude);
-            } else {
-                $y = $this->random->nextBoundedInt($this->random->nextBoundedInt(self::$caveMaxAltitude - self::$caveMinAltitude + 1) + 1) + self::$caveMinAltitude;
-            }
-
-            $z = $chunkZ * 16 + $this->random->nextBoundedInt(16);
-
-            $count = self::$caveSystemFrequency;
-            $largeCaveSpawned = false;
-            if ($this->random->nextBoundedInt(100) <= self::$individualCaveRarity) {
-                $this->generateLargeCaveNode($this->random->nextLong(), $generatingChunkBuffer, $x, $y, $z);
-                $largeCaveSpawned = true;
-            }
-
-            if (($largeCaveSpawned) || ($this->random->nextBoundedInt(100) <= self::$caveSystemPocketChance - 1)) {
-                $count += self::numberInRange($this->random, self::$caveSystemPocketMinSize, self::$caveSystemPocketMaxSize);
-            }
-            while ($count > 0) {
-                $count--;
-
-                $f1 = $this->random->nextFloat() * 3.141593 * 2.0;
-                $f2 = ($this->random->nextFloat() - 0.5) * 2.0 / 8.0;
-                $f3 = $this->random->nextFloat() * 2.0 + $this->random->nextFloat();
-
-                $this->generateCaveNode($this->random->nextLong(), $generatingChunkBuffer, $x, $y, $z, $f3, $f1, $f2, 0, 0, 1.0);
-            }
-        }
-    }
-
-    public static function numberInRange(Random $random, int $min, int $max) : int {
-        return $min + $random->nextBoundedInt($max - $min + 1);
     }
 
 }

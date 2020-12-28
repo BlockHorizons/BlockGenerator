@@ -1,30 +1,32 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\populator;
 
 use BlockHorizons\BlockGenerator\object\AcaciaTree;
 use BlockHorizons\BlockGenerator\object\BigSpruceTree;
 use pocketmine\block\Block;
-
 use pocketmine\level\ChunkManager;
 use pocketmine\level\generator\object\BirchTree;
 use pocketmine\level\generator\object\JungleTree;
 use pocketmine\level\generator\object\OakTree;
 use pocketmine\level\generator\object\SpruceTree;
-use pocketmine\level\generator\object\Tree;
 use pocketmine\utils\Random;
 
-class TreePopulator extends PopulatorCount {
-	
+class TreePopulator extends PopulatorCount
+{
+
     private $type;
     private $super;
     private $level;
 
-    public function __construct(int $type = \pocketmine\block\Wood::OAK, bool $super = false) {
+    public function __construct(int $type = \pocketmine\block\Wood::OAK, bool $super = false)
+    {
         $this->type = $type;
         $this->super = $super;
     }
 
-    public function populateCount(ChunkManager $level, int $chunkX, int $chunkZ, Random $random) : void {
+    public function populateCount(ChunkManager $level, int $chunkX, int $chunkZ, Random $random): void
+    {
         $this->level = $level;
         $x = $random->nextRange($chunkX << 4, ($chunkX << 4) + 15);
         $z = $random->nextRange($chunkZ << 4, ($chunkZ << 4) + 15);
@@ -33,9 +35,9 @@ class TreePopulator extends PopulatorCount {
             return;
         }
 
-        switch($this->type){
+        switch ($this->type) {
             case \pocketmine\block\Wood::SPRUCE:
-                if($this->super) {
+                if ($this->super) {
                     $tree = new BigSpruceTree(); // TODO: does normal API ?
                 } else {
                     $tree = new SpruceTree();
@@ -61,12 +63,13 @@ class TreePopulator extends PopulatorCount {
                 //}
                 break;
         }
-        if($tree->canPlaceObject($level, $x, $y, $z, $random)){
+        if ($tree->canPlaceObject($level, $x, $y, $z, $random)) {
             $tree->placeObject($level, $x, $y, $z, $random);
         }
     }
 
-    private function getHighestWorkableBlock(int $x, int $z) : int {
+    private function getHighestWorkableBlock(int $x, int $z): int
+    {
         for ($y = 254; $y > 0; --$y) {
             $b = $this->level->getBlockIdAt($x, $y, $z);
             if ($b === Block::DIRT || $b === Block::GRASS || $b === Block::TALL_GRASS) {

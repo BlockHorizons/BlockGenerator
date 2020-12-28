@@ -1,21 +1,23 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\object;
 
 use BlockHorizons\BlockGenerator\math\FacingHelper;
 use pocketmine\block\Block;
-
 use pocketmine\block\Wood2;
 use pocketmine\level\ChunkManager;
 use pocketmine\math\Vector3;
 use pocketmine\utils\Random;
 
-class AcaciaTree extends CustomTree {
+class AcaciaTree extends CustomTree
+{
 
     public $trunkBlock = Block::WOOD2;
     public $leafBlock = Block::LEAVES2;
     public $blockMeta = Wood2::ACACIA;
-	
-	public function placeObject(ChunkManager $level, int $x, int $y, int $z, Random $rand) : void {
+
+    public function placeObject(ChunkManager $level, int $x, int $y, int $z, Random $rand): void
+    {
         $i = $rand->nextBoundedInt(3) + $rand->nextBoundedInt(3) + 5;
         $flag = true;
 
@@ -33,12 +35,12 @@ class AcaciaTree extends CustomTree {
 
                 $vector3 = new Vector3();
 
-                for ($l = (int) $x - $k; $l <= $x + $k && $flag; ++$l) {
-                    for ($i1 = (int) $z - $k; $i1 <= $z + $k && $flag; ++$i1) {
+                for ($l = (int)$x - $k; $l <= $x + $k && $flag; ++$l) {
+                    for ($i1 = (int)$z - $k; $i1 <= $z + $k && $flag; ++$i1) {
                         if ($j >= 0 && $j < 256) {
 
                             $vector3->setComponents($l, $j, $i1);
-                            if (!$this->canOverride(Block::get($level->getBlockAt((int) $vector3->x, (int) $vector3->y, (int) $vector3->z)->getId()))) {
+                            if (!$this->canOverride(Block::get($level->getBlockAt((int)$vector3->x, (int)$vector3->y, (int)$vector3->z)->getId()))) {
                                 $flag = false;
                             }
                         } else {
@@ -54,8 +56,8 @@ class AcaciaTree extends CustomTree {
                 $block = $level->getBlockAt($x, $y - 1, $z)->getId();
 
                 if (($block === Block::GRASS || $block === Block::DIRT) && $y < 256 - $i - 1) {
-                    
-                	$level->setBlockIdAt($x, $y - 1, $z, Block::DIRT);
+
+                    $level->setBlockIdAt($x, $y - 1, $z, Block::DIRT);
 
                     $face = FacingHelper::HORIZONTAL[$rand->nextBoundedInt(4)];
                     $k2 = $i - $rand->nextBoundedInt(4) - 1;
@@ -119,7 +121,7 @@ class AcaciaTree extends CustomTree {
                             if ($l4 >= 1) {
                                 $j2 = $y + $l4;
                                 $i3 += FacingHelper::xOffset($face);
-	                            $j1 += FacingHelper::zOffset($face);
+                                $j1 += FacingHelper::zOffset($face);
                                 $blockpos1 = new Vector3($i3, $j2, $j1);
                                 $material1 = $level->getBlockAt($blockpos1->getFloorX(), $blockpos1->getFloorY(), $blockpos1->getFloorZ());
 
@@ -161,12 +163,14 @@ class AcaciaTree extends CustomTree {
         }
     }
 
-    private function placeLogAt(ChunkManager $level, Vector3 $pos) : void {
+    private function placeLogAt(ChunkManager $level, Vector3 $pos): void
+    {
         $level->setBlockIdAt($pos->x, $pos->y, $pos->z, $this->trunkBlock);
         $level->setBlockDataAt($pos->x, $pos->y, $pos->z, 3);
     }
 
-    private function placeLeafAt(ChunkManager $worldIn, Vector3 $pos) : void {
+    private function placeLeafAt(ChunkManager $worldIn, Vector3 $pos): void
+    {
         $material = $worldIn->getBlockAt($pos->x, $pos->y, $pos->z)->getId();
 
         if ($material === Block::AIR || $material === Block::LEAVES) {

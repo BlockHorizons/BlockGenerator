@@ -1,14 +1,14 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\object;
 
 use pocketmine\block\Block;
-
 use pocketmine\level\ChunkManager;
-use pocketmine\level\generator\object\Tree;
 use pocketmine\math\Vector3;
 use pocketmine\utils\Random;
 
-class SwampTree extends CustomTree {
+class SwampTree extends CustomTree
+{
 
     /**
      * The metadata value of the wood to use in tree generation.
@@ -20,9 +20,12 @@ class SwampTree extends CustomTree {
      */
     private $metaLeaves = \pocketmine\block\Wood::OAK;
 
-    public function __construct() {}
+    public function __construct()
+    {
+    }
 
-    public function generate(ChunkManager $worldIn, Random $rand, Vector3 $vectorPosition) : bool {
+    public function generate(ChunkManager $worldIn, Random $rand, Vector3 $vectorPosition): bool
+    {
         $position = $vectorPosition->floor();
 
         $i = $rand->nextBoundedInt(4) + 5;
@@ -140,11 +143,14 @@ class SwampTree extends CustomTree {
         }
     }
 
-    private function addVine(ChunkManager $worldIn, Vector3 $pos, int $meta) : void {
-        $this->setBlockAndNotifyAdequately($worldIn, $pos, Block::get(Block::VINE, $meta));
+    private function setBlockAndNotifyAdequately(ChunkManager $level, Vector3 $pos, Block $b): void
+    {
+        $level->setBlockIdAt($pos->x, $pos->y, $pos->z, $b->getId());
+        $level->setBlockDataAt($pos->x, $pos->y, $pos->z, $b->getVariant());
     }
 
-    private function addHangingVine(ChunkManager $worldIn, Vector3 $pos, int $meta) : void {
+    private function addHangingVine(ChunkManager $worldIn, Vector3 $pos, int $meta): void
+    {
         $this->addVine($worldIn, $pos, $meta);
         $i = 4;
 
@@ -154,9 +160,9 @@ class SwampTree extends CustomTree {
         }
     }
 
-    private function setBlockAndNotifyAdequately(ChunkManager $level, Vector3 $pos, Block $b) : void {
-        $level->setBlockIdAt($pos->x, $pos->y, $pos->z, $b->getId());
-        $level->setBlockDataAt($pos->x, $pos->y, $pos->z, $b->getVariant());
+    private function addVine(ChunkManager $worldIn, Vector3 $pos, int $meta): void
+    {
+        $this->setBlockAndNotifyAdequately($worldIn, $pos, Block::get(Block::VINE, $meta));
     }
 
 }

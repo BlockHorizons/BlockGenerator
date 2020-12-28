@@ -1,13 +1,16 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\biomes\impl\mushroom;
 
 use BlockHorizons\BlockGenerator\biomes\type\GrassyBiome;
 use BlockHorizons\BlockGenerator\populator\MushroomPopulator;
 use pocketmine\block\Block;
 
-class MushroomIslandBiome extends GrassyBiome {
+class MushroomIslandBiome extends GrassyBiome
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         $mushroomPopulator = new MushroomPopulator();
         $mushroomPopulator->setBaseAmount(1);
         $this->addPopulator($mushroomPopulator);
@@ -16,11 +19,13 @@ class MushroomIslandBiome extends GrassyBiome {
         $this->setHeightVariation(0.3);
     }
 
-    public function getName() : string {
+    public function getName(): string
+    {
         return "Mushroom Island";
     }
 
-    public function getSurfaceBlock(int $y) : int {
+    public function getSurfaceBlock(int $y): int
+    {
         return Block::MYCELIUM;
     }
 }

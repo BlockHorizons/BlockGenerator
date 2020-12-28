@@ -1,14 +1,16 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\biomes\impl\taiga;
 
 use BlockHorizons\BlockGenerator\biomes\type\GrassyBiome;
 use BlockHorizons\BlockGenerator\populator\TreePopulator;
-use pocketmine\block\Block;
 
 
-class TaigaBiome extends GrassyBiome {
+class TaigaBiome extends GrassyBiome
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
 
         $trees = new TreePopulator(\pocketmine\block\Wood::SPRUCE);
@@ -20,7 +22,8 @@ class TaigaBiome extends GrassyBiome {
         $this->setHeightVariation(0.2);
     }
 
-    public function getName() : string {
+    public function getName(): string
+    {
         return "Taiga";
     }
 }

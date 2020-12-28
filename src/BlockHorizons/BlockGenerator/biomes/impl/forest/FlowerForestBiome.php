@@ -1,13 +1,16 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\biomes\impl\forest;
 
 use BlockHorizons\BlockGenerator\populator\FlowerPopulator;
 use pocketmine\block\Block;
 use pocketmine\block\Flower;
 
-class FlowerForestBiome extends ForestBiome {
+class FlowerForestBiome extends ForestBiome
+{
 
-    public function __construct(int $type = ForestBiome::TYPE_NORMAL) {
+    public function __construct(int $type = ForestBiome::TYPE_NORMAL)
+    {
         parent::__construct($type);
 
         //see https://minecraft.gamepedia.com/Flower#Flower_biomes
@@ -30,8 +33,9 @@ class FlowerForestBiome extends ForestBiome {
         $this->setHeightVariation(0.4);
     }
 
-    public function getName() : string {
+    public function getName(): string
+    {
         return $this->type == self::TYPE_BIRCH ? "Birch Forest" : "Forest";
     }
-    
+
 }

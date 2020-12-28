@@ -1,13 +1,13 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\biomes\impl\forest;
 
 use BlockHorizons\BlockGenerator\biomes\type\GrassyBiome;
 use BlockHorizons\BlockGenerator\populator\TreePopulator;
 
-use pocketmine\block\Block;
 
-
-class ForestBiome extends GrassyBiome {
+class ForestBiome extends GrassyBiome
+{
 
     const TYPE_NORMAL = 0;
     const TYPE_BIRCH = 1;
@@ -15,7 +15,8 @@ class ForestBiome extends GrassyBiome {
 
     protected $type;
 
-    public function __construct(int $type = self::TYPE_NORMAL) {
+    public function __construct(int $type = self::TYPE_NORMAL)
+    {
 
         $this->type = $type;
 
@@ -31,11 +32,13 @@ class ForestBiome extends GrassyBiome {
         }
     }
 
-    public function getType() : int {
+    public function getType(): int
+    {
         return $this->type;
     }
 
-    public function getName() : string {
+    public function getName(): string
+    {
         switch ($this->type) {
             case self::TYPE_BIRCH:
                 return "Birch Forest";

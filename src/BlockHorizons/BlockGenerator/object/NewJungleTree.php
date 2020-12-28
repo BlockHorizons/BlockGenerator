@@ -1,19 +1,18 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\object;
 
 use BlockHorizons\BlockGenerator\math\FacingHelper;
 use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
 use pocketmine\block\UnknownBlock;
-use pocketmine\block\Vine;
-
 use pocketmine\level\ChunkManager;
-use pocketmine\level\generator\object\Tree;
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\utils\Random;
 
-class NewJungleTree extends CustomTree {
+class NewJungleTree extends CustomTree
+{
 
     /**
      * The minimum height of a generated tree.
@@ -32,12 +31,14 @@ class NewJungleTree extends CustomTree {
      */
     protected $metaLeaves = \pocketmine\block\Wood::JUNGLE;
 
-    public function __construct(int $minTreeHeight, int $maxTreeHeight) {
+    public function __construct(int $minTreeHeight, int $maxTreeHeight)
+    {
         $this->minTreeHeight = $minTreeHeight;
         $this->maxTreeHeight = $maxTreeHeight;
     }
 
-    public function generate(ChunkManager $worldIn, Random $rand, Vector3 $vectorPosition) : bool {
+    public function generate(ChunkManager $worldIn, Random $rand, Vector3 $vectorPosition): bool
+    {
         $position = new Vector3($vectorPosition->getFloorX(), $vectorPosition->getFloorY(), $vectorPosition->getFloorZ());
 
         $i = $rand->nextBoundedInt($this->maxTreeHeight) + $this->minTreeHeight;
@@ -187,17 +188,24 @@ class NewJungleTree extends CustomTree {
         }
     }
 
-    private function placeCocoa(ChunkManager $worldIn, int $age, Vector3 $pos, int $side) : void {
-        $meta = $this->getCocoaMeta($age, $side);
-
-        $this->setBlockAndNotifyAdequately($worldIn, $pos, new UnknownBlock(127, $meta));
+    public function setBlockAndNotifyAdequately(ChunkManager $level, Vector3 $pos, Block $block): void
+    {
+        $level->setBlockIdAt($pos->x, $pos->y, $pos->z, $block->getId());
+        $level->setBlockDataAt($pos->x, $pos->y, $pos->z, $block->getDamage());
     }
 
-    private function addVine(ChunkManager $worldIn, Vector3 $pos, int $meta) : void {
+    private function isAirBlock(ChunkManager $level, Vector3 $v): bool
+    {
+        return $level->getBlockIdAt($v->x, $v->y, $v->z) === Block::AIR;
+    }
+
+    private function addVine(ChunkManager $worldIn, Vector3 $pos, int $meta): void
+    {
         $this->setBlockAndNotifyAdequately($worldIn, $pos, Block::get(Block::VINE, $meta));
     }
 
-    private function addHangingVine(ChunkManager $worldIn, Vector3 $pos, int $meta) : void {
+    private function addHangingVine(ChunkManager $worldIn, Vector3 $pos, int $meta): void
+    {
         $this->addVine($worldIn, $pos, $meta);
         $i = 4;
 
@@ -207,11 +215,15 @@ class NewJungleTree extends CustomTree {
         }
     }
 
-    private function isAirBlock(ChunkManager $level, Vector3 $v) : bool {
-        return $level->getBlockIdAt($v->x, $v->y, $v->z) === Block::AIR;
+    private function placeCocoa(ChunkManager $worldIn, int $age, Vector3 $pos, int $side): void
+    {
+        $meta = $this->getCocoaMeta($age, $side);
+
+        $this->setBlockAndNotifyAdequately($worldIn, $pos, new UnknownBlock(127, $meta));
     }
 
-    private function getCocoaMeta(int $age, int $side) : int {
+    private function getCocoaMeta(int $age, int $side): int
+    {
         $meta = 0;
 
         $meta *= $age;
@@ -230,11 +242,6 @@ class NewJungleTree extends CustomTree {
         }
 
         return $meta;
-    }
-
-    public function setBlockAndNotifyAdequately(ChunkManager $level, Vector3 $pos, Block $block) : void {
-        $level->setBlockIdAt($pos->x, $pos->y, $pos->z, $block->getId());
-        $level->setBlockDataAt($pos->x, $pos->y, $pos->z, $block->getDamage());
     }
 
 }

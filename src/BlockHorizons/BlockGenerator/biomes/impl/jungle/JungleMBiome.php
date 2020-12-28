@@ -1,11 +1,14 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\biomes\impl\jungle;
 
 use BlockHorizons\BlockGenerator\populator\tree\JungleFloorPopulator;
 
-class JungleMBiome extends JungleBiome {
+class JungleMBiome extends JungleBiome
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
 
         $floor = new JungleFloorPopulator();
@@ -17,7 +20,8 @@ class JungleMBiome extends JungleBiome {
         $this->setHeightVariation(0.4);
     }
 
-    public function getName() : string {
+    public function getName(): string
+    {
         return "Jungle M";
     }
 }

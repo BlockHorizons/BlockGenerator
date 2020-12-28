@@ -1,27 +1,29 @@
 <?php
+
 namespace BLockHorizons\BlockGenerator\populator\tree;
 
 use BlockHorizons\BlockGenerator\object\BigJungleTree;
-use BlockHorizons\BlockGenerator\object\NewJungleTree;
 use BlockHorizons\BlockGenerator\populator\PopulatorCount;
 use pocketmine\block\Block;
-
 use pocketmine\level\ChunkManager;
 use pocketmine\math\Vector3;
 use pocketmine\utils\Random;
 
-class BigJungleTreePopulator extends PopulatorCount {
+class BigJungleTreePopulator extends PopulatorCount
+{
 
     private $level;
 
     /** @var int */
     private $type;
 
-    public function __construct(int $type = \pocketmine\block\Wood::JUNGLE) {
+    public function __construct(int $type = \pocketmine\block\Wood::JUNGLE)
+    {
         $this->type = $type;
     }
 
-    public function populateCount(ChunkManager $level, int $chunkX, int $chunkZ, Random $random) : void {
+    public function populateCount(ChunkManager $level, int $chunkX, int $chunkZ, Random $random): void
+    {
         $this->level = $level;
         $chunk = $level->getChunk($chunkX, $chunkZ);
         // This should be removed? As same things is done in PopulatorCount upon calling this method
@@ -39,7 +41,8 @@ class BigJungleTreePopulator extends PopulatorCount {
         }
     }
 
-    protected function getHighestWorkableBlock(int $x, int $z) : int {
+    protected function getHighestWorkableBlock(int $x, int $z): int
+    {
         $y = 0;
         for ($y = 255; $y > 0; --$y) {
             $b = $this->level->getBlockIdAt($x, $y, $z);

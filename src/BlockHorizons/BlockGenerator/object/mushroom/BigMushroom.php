@@ -1,4 +1,5 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\object\mushroom;
 
 use BlockHorizons\BlockGenerator\object\BasicGenerator;
@@ -9,8 +10,9 @@ use pocketmine\level\ChunkManager;
 use pocketmine\math\Vector3;
 use pocketmine\utils\Random;
 
-class BigMushroom extends BasicGenerator {
-    
+class BigMushroom extends BasicGenerator
+{
+
     const NORTH_WEST = 1;
     const NORTH = 2;
     const NORTH_EAST = 3;
@@ -30,11 +32,13 @@ class BigMushroom extends BasicGenerator {
 
     private $mushroomType;
 
-    public function __construct(?int $mushroomType = null) {
+    public function __construct(?int $mushroomType = null)
+    {
         $this->mushroomType = $mushroomType ?? -1;
     }
 
-    public function generate(ChunkManager $level, Random $rand, Vector3 $position) : bool {
+    public function generate(ChunkManager $level, Random $rand, Vector3 $position): bool
+    {
         $block = $this->mushroomType;
         if ($block < 0) {
             $block = $rand->nextBoolean() ? self::RED : self::BROWN;

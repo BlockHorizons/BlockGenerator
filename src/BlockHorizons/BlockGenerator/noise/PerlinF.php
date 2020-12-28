@@ -1,17 +1,20 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\noise;
 
 use pocketmine\level\generator\noise\Noise;
 use pocketmine\utils\Random;
 
-class PerlinF extends Noise {
+class PerlinF extends Noise
+{
 
     protected $perm = [];
     protected $offsetX = 0;
     protected $offsetY = 0;
     protected $offsetZ = 0;
 
-    public function __construct(Random $random, float $octaves, float $persistence, float $expansion) {
+    public function __construct(Random $random, float $octaves, float $persistence, float $expansion)
+    {
         $this->octaves = $octaves;
         $this->persistence = $persistence;
         $this->expansion = $expansion;
@@ -31,18 +34,20 @@ class PerlinF extends Noise {
         }
     }
 
-    public function getNoise2D($x, $y) {
+    public function getNoise2D($x, $y)
+    {
         return $this->getNoise3D($x, $y, 0);
     }
 
-    public function getNoise3D($x, $y, $z) {
+    public function getNoise3D($x, $y, $z)
+    {
         $x += $this->offsetX;
         $y += $this->offsetY;
         $z += $this->offsetZ;
 
-        $floorX = (int) $x;
-        $floorY = (int) $y;
-        $floorZ = (int) $z;
+        $floorX = (int)$x;
+        $floorY = (int)$y;
+        $floorZ = (int)$z;
 
         $x1 = $floorX & 0xFF;
         $y1 = $floorY & 0xFF;
@@ -95,11 +100,12 @@ class PerlinF extends Noise {
      * @param $z
      * @return float
      */
-    public static function grad($hash, $x, $y, $z) {
+    public static function grad($hash, $x, $y, $z)
+    {
         $hash &= 15;
         $u = $hash < 8 ? $x : $y;
         $v = $hash < 4 ? $y : (($hash === 12 || $hash === 14) ? $x :
-                $z);
+            $z);
 
         return (($hash & 1) === 0 ? $u : -$u) + (($hash & 2) === 0 ? $v : -$v);
     }

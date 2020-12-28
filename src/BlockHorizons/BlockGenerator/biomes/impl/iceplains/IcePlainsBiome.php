@@ -1,13 +1,15 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\biomes\impl\iceplains;
 
 use BlockHorizons\BlockGenerator\biomes\type\SnowyBiome;
 use BlockHorizons\BlockGenerator\populator\TreePopulator;
-use pocketmine\block\Block;
 
-class IcePlainsBiome extends SnowyBiome {
+class IcePlainsBiome extends SnowyBiome
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
 
         $tree = new TreePopulator(\pocketmine\block\Wood::SPRUCE);
@@ -19,7 +21,8 @@ class IcePlainsBiome extends SnowyBiome {
         $this->setHeightVariation(0.05);
     }
 
-    public function getName() : string {
+    public function getName(): string
+    {
         return "Ice Plains";
     }
 

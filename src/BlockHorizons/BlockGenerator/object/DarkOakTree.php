@@ -1,15 +1,16 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\object;
 
 use BlockHorizons\BlockGenerator\math\FacingHelper;
 use pocketmine\block\Block;
-
 use pocketmine\block\Wood2;
 use pocketmine\level\ChunkManager;
 use pocketmine\math\Vector3;
 use pocketmine\utils\Random;
 
-class DarkOakTree extends CustomTree {
+class DarkOakTree extends CustomTree
+{
 
     /**
      * The metadata value of the wood to use in tree generation.
@@ -21,7 +22,8 @@ class DarkOakTree extends CustomTree {
      */
     protected $metaLeaves = \pocketmine\block\Leaves::DARK_OAK;
 
-    public function generate(ChunkManager $level, Random $rand, Vector3 $position) : bool {
+    public function generate(ChunkManager $level, Random $rand, Vector3 $position): bool
+    {
         $i = $rand->nextBoundedInt(3) + $rand->nextBoundedInt(2) + 6;
         $j = $position->getFloorX();
         $k = $position->getFloorY();
@@ -130,7 +132,8 @@ class DarkOakTree extends CustomTree {
         }
     }
 
-    protected function placeTreeOfHeight(ChunkManager $worldIn, Vector3 $pos, int $height) : bool {
+    protected function placeTreeOfHeight(ChunkManager $worldIn, Vector3 $pos, int $height): bool
+    {
         $i = $pos->getFloorX();
         $j = $pos->getFloorY();
         $k = $pos->getFloorZ();
@@ -160,27 +163,31 @@ class DarkOakTree extends CustomTree {
         return true;
     }
 
-    protected function placeLogAt(ChunkManager $worldIn, Vector3 $pos) : void {
+    public function setDirtAt(ChunkManager $level, Vector3 $pos): void
+    {
+        $level->setBlockIdAt($pos->x, $pos->y, $pos->z, Block::DIRT);
+    }
+
+    protected function placeLogAt(ChunkManager $worldIn, Vector3 $pos): void
+    {
         if ($this->canOverride(Block::get($worldIn->getBlockIdAt($pos->getX(), $pos->getY(), $pos->getZ())))) {
             $this->setBlockAndNotifyAdequately($worldIn, $pos, Block::get(Block::LOG2, Wood2::DARK_OAK));
         }
     }
 
-    protected function placeLeafAt(ChunkManager $worldIn, int $x, int $y, int $z) : void {
+    public function setBlockAndNotifyAdequately(ChunkManager $level, Vector3 $pos, Block $block): void
+    {
+        $level->setBlockIdAt($pos->x, $pos->y, $pos->z, $block->getId());
+        $level->setBlockDataAt($pos->x, $pos->y, $pos->z, $block->getDamage());
+    }
+
+    protected function placeLeafAt(ChunkManager $worldIn, int $x, int $y, int $z): void
+    {
         $material = $worldIn->getBlockIdAt($x, $y, $z);
 
         if ($material === Block::AIR) {
             $this->setBlockAndNotifyAdequately($worldIn, new Vector3($x, $y, $z), Block::get(Block::LEAVES2, $this->metaLeaves));
         }
-    }
-
-    public function setBlockAndNotifyAdequately(ChunkManager $level, Vector3 $pos, Block $block) : void {
-        $level->setBlockIdAt($pos->x, $pos->y, $pos->z, $block->getId());
-        $level->setBlockDataAt($pos->x, $pos->y, $pos->z, $block->getDamage());
-    }
-
-    public function setDirtAt(ChunkManager $level, Vector3 $pos) : void {
-        $level->setBlockIdAt($pos->x, $pos->y, $pos->z, Block::DIRT);
     }
 
 }

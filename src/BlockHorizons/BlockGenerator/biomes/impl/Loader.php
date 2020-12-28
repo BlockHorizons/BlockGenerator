@@ -11,32 +11,36 @@ use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\level\generator\GeneratorManager;
 use pocketmine\plugin\PluginBase;
 
-class Loader extends PluginBase implements Listener {
+class Loader extends PluginBase implements Listener
+{
 
-	private $config;
-	
-	public function onEnable() {
-		CustomBiome::init();
+    private $config;
 
-		$b = new CustomBiomeSelector(new CustomRandom());
-		$b->recalculate();
-		
-		GeneratorManager::addGenerator(BlockGenerator::class, "blockgen", true);
-		$this->getServer()->generateLevel("rblock", 404, BlockGenerator::class, []);
-		$this->getServer()->loadLevel("rblock");
-		$level = $this->getServer()->getLevelByName("rblock");
+    public function onEnable()
+    {
+        CustomBiome::init();
 
-		$this->getServer()->getPluginManager()->registerEvents($this, $this);
-	}
+        $b = new CustomBiomeSelector(new CustomRandom());
+        $b->recalculate();
 
-	public function onPlayerMove(PlayerMoveEvent $event) {
-		$player = $event->getPlayer();
-		$chunk = $player->getLevel()->getChunk($cx = $player->x >> 4, $cz = $player->z >> 4);
-		$biome = CustomBiome::getBiome($chunk->getBiomeId($rx = $player->x % 16, $rz = $player->z % 16));
-		$player->sendTip("Chunk ($cx, $cz)"."\n"."Biome @ {$rx}, {$rz}: ".$biome->getName()." ({$biome->getId()})"."\n"."Temperature: ".$biome->getTemperature()."\n"."Rainfall: ".$biome->getRainfall()." Elevation: ".$biome->getBaseHeight()." variation: ".$biome->getHeightVariation());
-	}
-	
-	public function onDisable() {
-		
-	}
+        GeneratorManager::addGenerator(BlockGenerator::class, "blockgen", true);
+        $this->getServer()->generateLevel("rblock", 404, BlockGenerator::class, []);
+        $this->getServer()->loadLevel("rblock");
+        $level = $this->getServer()->getLevelByName("rblock");
+
+        $this->getServer()->getPluginManager()->registerEvents($this, $this);
+    }
+
+    public function onPlayerMove(PlayerMoveEvent $event)
+    {
+        $player = $event->getPlayer();
+        $chunk = $player->getLevel()->getChunk($cx = $player->x >> 4, $cz = $player->z >> 4);
+        $biome = CustomBiome::getBiome($chunk->getBiomeId($rx = $player->x % 16, $rz = $player->z % 16));
+        $player->sendTip("Chunk ($cx, $cz)" . "\n" . "Biome @ {$rx}, {$rz}: " . $biome->getName() . " ({$biome->getId()})" . "\n" . "Temperature: " . $biome->getTemperature() . "\n" . "Rainfall: " . $biome->getRainfall() . " Elevation: " . $biome->getBaseHeight() . " variation: " . $biome->getHeightVariation());
+    }
+
+    public function onDisable()
+    {
+
+    }
 }

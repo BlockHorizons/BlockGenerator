@@ -1,14 +1,16 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\noise;
 
 use BlockHorizons\BlockGenerator\math\CustomRandom;
 
-class NoiseGeneratorOctaves {
+class NoiseGeneratorOctaves
+{
 
     /**
      * Collection of noise generation functions.  Output is combined to produce different octaves of noise.
      */
-    
+
     /** @var NoiseGeneratorImproved[] */
     private $generatorCollection;
 
@@ -16,8 +18,8 @@ class NoiseGeneratorOctaves {
     private $octaves;
 
 
-
-    public function __construct(CustomRandom $seed, int $octavesIn) {
+    public function __construct(CustomRandom $seed, int $octavesIn)
+    {
         $this->octaves = $octavesIn;
         $this->generatorCollection = new \SplFixedArray($octavesIn);
 
@@ -27,12 +29,18 @@ class NoiseGeneratorOctaves {
     }
 
 
-
     /*
      * pars:(par2,3,4=noiseOffset ; so that adjacent noise segments connect) (pars5,6,7=x,y,zArraySize),(pars8,10,12 =
      * x,y,z noiseScale)
      */
-    public function generateNoiseOctaves(array $noiseArray, int $xOffset, int $yOffset, int $zOffset, int $xSize, int $ySize, int $zSize, float $xScale, float $yScale, float $zScale) {
+
+    public function generateNoiseOctaves8(array &$noiseArray, int $xOffset, int $zOffset, int $xSize, int $zSize, float $xScale, float $zScale, float $p_76305_10_)
+    {
+        return $this->generateNoiseOctaves($noiseArray, $xOffset, 10, $zOffset, $xSize, 1, $zSize, $xScale, 1.0, $zScale);
+    }
+
+    public function generateNoiseOctaves(array $noiseArray, int $xOffset, int $yOffset, int $zOffset, int $xSize, int $ySize, int $zSize, float $xScale, float $yScale, float $zScale)
+    {
 
         if ($noiseArray == null) {
             $noiseArray = [];
@@ -45,7 +53,6 @@ class NoiseGeneratorOctaves {
         $d3 = 1.0;
 
 
-
         for ($j = 0; $j < $this->octaves; ++$j) {
 
             $d0 = $xOffset * $d3 * $xScale;
@@ -56,17 +63,17 @@ class NoiseGeneratorOctaves {
 
             $l = floor($d2);
 
-            $d0 = $d0 - ((float) $k);
+            $d0 = $d0 - ((float)$k);
 
-            $d2 = $d2 - ((float) $l);
+            $d2 = $d2 - ((float)$l);
 
             $k = $k % 16777216;
 
             $l = $l % 16777216;
 
-            $d0 = $d0 + ((float) $k);
+            $d0 = $d0 + ((float)$k);
 
-            $d2 = $d2 + ((float) $l);
+            $d2 = $d2 + ((float)$l);
 
             $this->generatorCollection[$j]->populateNoiseArray($noiseArray, $d0, $d1, $d2, $xSize, $ySize, $zSize, $xScale * $d3, $yScale * $d3, $zScale * $d3, $d3);
 
@@ -74,12 +81,7 @@ class NoiseGeneratorOctaves {
         }
 
 
-
         return $noiseArray;
-    }
-
-    public function generateNoiseOctaves8(array &$noiseArray, int $xOffset, int $zOffset, int $xSize, int $zSize, float $xScale, float $zScale, float $p_76305_10_) {
-        return $this->generateNoiseOctaves($noiseArray, $xOffset, 10, $zOffset, $xSize, 1, $zSize, $xScale, 1.0, $zScale);
     }
 
 }

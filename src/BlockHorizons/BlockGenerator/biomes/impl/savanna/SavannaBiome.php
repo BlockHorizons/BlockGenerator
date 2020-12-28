@@ -1,14 +1,16 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\biomes\impl\savanna;
 
 use BlockHorizons\BlockGenerator\biomes\type\GrassyBiome;
 use BlockHorizons\BlockGenerator\populator\TreePopulator;
-use pocketmine\block\Block;
 
 
-class SavannaBiome extends GrassyBiome {
+class SavannaBiome extends GrassyBiome
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
 
         $tree = new TreePopulator(\pocketmine\block\Wood2::ACACIA);
@@ -19,7 +21,8 @@ class SavannaBiome extends GrassyBiome {
         $this->setHeightVariation(0.05);
     }
 
-    public function getName() : string {
+    public function getName(): string
+    {
         return "Savanna";
     }
 }

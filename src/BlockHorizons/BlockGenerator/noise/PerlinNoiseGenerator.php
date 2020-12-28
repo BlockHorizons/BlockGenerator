@@ -1,15 +1,17 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\noise;
 
-use BlockHorizons\BlockGenerator\noise\SimplexF;
 use pocketmine\utils\Random;
 
-class PerlinNoiseGenerator {
+class PerlinNoiseGenerator
+{
 
     private $noiseLevels = [];
     private $levels;
 
-    public function __construct(Random $p_i45470_1_, int $p_i45470_2_) {
+    public function __construct(Random $p_i45470_1_, int $p_i45470_2_)
+    {
         $this->levels = $p_i45470_2_;
         $this->noiseLevels = new SimplexF($p_i45470_2_);
 
@@ -18,7 +20,8 @@ class PerlinNoiseGenerator {
         }
     }
 
-    public function getValue(float $p_151601_1_, float $p_151601_3_) : float {
+    public function getValue(float $p_151601_1_, float $p_151601_3_): float
+    {
         $d0 = 0.0;
         $d1 = 1.0;
 
@@ -30,7 +33,8 @@ class PerlinNoiseGenerator {
         return $d0;
     }
 
-    public function getRegion(array $p_151600_1_, float $p_151600_2_, float $p_151600_4_, int $p_151600_6_, int $p_151600_7_, float $p_151600_8_, float $p_151600_10_, float $p_151600_12_, float $p_151600_14_ = 0.5) {
+    public function getRegion(array $p_151600_1_, float $p_151600_2_, float $p_151600_4_, int $p_151600_6_, int $p_151600_7_, float $p_151600_8_, float $p_151600_10_, float $p_151600_12_, float $p_151600_14_ = 0.5)
+    {
         if ($p_151600_1_ !== null && count($p_151600_1_) >= $p_151600_6_ * $p_151600_7_) {
             for ($i = 0; $i < count($p_151600_1_); ++$i) {
                 $p_151600_1_[$i] = 0.0;

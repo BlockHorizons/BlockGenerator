@@ -1,25 +1,28 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\populator\tree;
 
 use BlockHorizons\BlockGenerator\object\SwampTree;
 use BlockHorizons\BlockGenerator\populator\PopulatorCount;
 use pocketmine\block\Block;
-
 use pocketmine\level\ChunkManager;
 use pocketmine\math\Vector3;
 use pocketmine\utils\Random;
 
-class SwampTreePopulator extends PopulatorCount {
-    
+class SwampTreePopulator extends PopulatorCount
+{
+
     private $level;
 
     private $type;
 
-    public function __construct(int $type = \pocketmine\block\Wood::OAK) {
+    public function __construct(int $type = \pocketmine\block\Wood::OAK)
+    {
         $this->type = $type;
     }
 
-    public function populateCount(ChunkManager $level, int $chunkX, int $chunkZ, Random $random) : void {
+    public function populateCount(ChunkManager $level, int $chunkX, int $chunkZ, Random $random): void
+    {
         $this->level = $level;
 
         $x = $random->nextRange($chunkX << 4, ($chunkX << 4) + 15);
@@ -31,7 +34,8 @@ class SwampTreePopulator extends PopulatorCount {
         (new SwampTree($this->type))->generate($level, $random, new Vector3($x, $y, $z));
     }
 
-    private function getHighestWorkableBlock(int $x, int $z) : int {
+    private function getHighestWorkableBlock(int $x, int $z): int
+    {
         $y;
         for ($y = 127; $y > 0; --$y) {
             $b = $this->level->getBlockIdAt($x, $y, $z);

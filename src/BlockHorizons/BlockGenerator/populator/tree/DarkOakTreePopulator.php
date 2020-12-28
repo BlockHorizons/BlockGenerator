@@ -1,25 +1,28 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\populator\tree;
 
 use BlockHorizons\BlockGenerator\object\DarkOakTree;
 use BlockHorizons\BlockGenerator\populator\PopulatorCount;
 use pocketmine\block\Block;
-
 use pocketmine\level\ChunkManager;
 use pocketmine\math\Vector3;
 use pocketmine\utils\Random;
 
-class DarkOakTreePopulator extends PopulatorCount {
-    
+class DarkOakTreePopulator extends PopulatorCount
+{
+
     protected $level;
 
     protected $type;
 
-    public function __construct(int $type = \pocketmine\block\Wood2::DARK_OAK) {
+    public function __construct(int $type = \pocketmine\block\Wood2::DARK_OAK)
+    {
         $this->type = $type;
     }
 
-    public function populateCount(ChunkManager $level, int $chunkX, int $chunkZ, Random $random) : void {
+    public function populateCount(ChunkManager $level, int $chunkX, int $chunkZ, Random $random): void
+    {
         $this->level = $level;
 
         $x = $random->nextRange($chunkX << 4, ($chunkX << 4) + 15);
@@ -32,7 +35,8 @@ class DarkOakTreePopulator extends PopulatorCount {
         (new DarkOakTree())->generate($level, $random, new Vector3($x, $y, $z));
     }
 
-    protected function getHighestWorkableBlock(int $x, int $z) : int {
+    protected function getHighestWorkableBlock(int $x, int $z): int
+    {
         $y = 0;
         for ($y = 255; $y > 0; --$y) {
             $b = $this->level->getBlockIdAt($x, $y, $z);

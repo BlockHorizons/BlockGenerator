@@ -1,4 +1,5 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\biomes\impl\roofedforest;
 
 use BlockHorizons\BlockGenerator\biomes\type\GrassyBiome;
@@ -6,9 +7,11 @@ use BlockHorizons\BlockGenerator\populator\FlowerPopulator;
 use BlockHorizons\BlockGenerator\populator\MushroomPopulator;
 use BlockHorizons\BlockGenerator\populator\tree\DarkOakTreePopulator;
 
-class RoofedForestBiome extends GrassyBiome {
+class RoofedForestBiome extends GrassyBiome
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
 
         $tree = new DarkOakTreePopulator();
@@ -26,7 +29,8 @@ class RoofedForestBiome extends GrassyBiome {
         $this->addPopulator($mushroom);
     }
 
-    public function getName() : string {
+    public function getName(): string
+    {
         return "Roofed Forest";
     }
 

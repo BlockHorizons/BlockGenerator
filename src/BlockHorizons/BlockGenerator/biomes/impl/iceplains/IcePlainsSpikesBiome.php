@@ -1,4 +1,5 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\biomes\impl\iceplains;
 
 use pocketmine\block\Block;
@@ -7,33 +8,40 @@ use pocketmine\level\format\Chunk;
 use pocketmine\level\generator\populator\Populator;
 use pocketmine\utils\Random;
 
-class IcePlainsSpikesBiome extends IcePlainsBiome {
+class IcePlainsSpikesBiome extends IcePlainsBiome
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
 
         $iceSpikes = new IceSpikesPopulator();
         $this->addPopulator($iceSpikes);
     }
 
-    public function getSurfaceBlock(int $y) : int {
+    public function getSurfaceBlock(int $y): int
+    {
         return Block::SNOW_BLOCK;
     }
 
-    public function getName() : string {
+    public function getName(): string
+    {
         return "Ice Plains Spikes";
     }
 
-    public function isFreezing() : bool {
+    public function isFreezing(): bool
+    {
         return true;
     }
 
 }
 
 
-class IceSpikesPopulator extends Populator {
+class IceSpikesPopulator extends Populator
+{
 
-    public function populate(ChunkManager $level, int $chunkX, int $chunkZ, Random $random) : void {
+    public function populate(ChunkManager $level, int $chunkX, int $chunkZ, Random $random): void
+    {
         for ($i = 0; $i < 8; $i++) {
             $x = ($chunkX << 4) + $random->nextBoundedInt(16);
             $z = ($chunkZ << 4) + $random->nextBoundedInt(16);
@@ -79,10 +87,10 @@ class IceSpikesPopulator extends Populator {
                 $shrinkFactor = $baseWidth / $height;
                 $currWidth = $baseWidth;
                 for ($y = $startY; $y < $maxY; $y++) {
-                    for ($xx = (int) -$currWidth; $xx < $currWidth; $xx++) {
-                        for ($zz = (int) -$currWidth; $zz < $currWidth; $zz++) {
-                            $currDist = (int) sqrt($xx * $xx + $zz * $zz);
-                            if ((int) $currWidth != (int) $currDist && $random->nextBoolean()) {
+                    for ($xx = (int)-$currWidth; $xx < $currWidth; $xx++) {
+                        for ($zz = (int)-$currWidth; $zz < $currWidth; $zz++) {
+                            $currDist = (int)sqrt($xx * $xx + $zz * $zz);
+                            if ((int)$currWidth != (int)$currDist && $random->nextBoolean()) {
                                 $level->setBlockIdAt($x + $xx, $y, $z + $zz, Block::PACKED_ICE);
                             }
                         }
@@ -93,7 +101,8 @@ class IceSpikesPopulator extends Populator {
         }
     }
 
-    public function getHighestWorkableBlock(int $x, int $z, Chunk $chunk) : int {
+    public function getHighestWorkableBlock(int $x, int $z, Chunk $chunk): int
+    {
         return $chunk->getHighestBlockAt($x & 0xF, $z & 0xF) - 5;
     }
 

@@ -1,12 +1,14 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\biomes\impl\plains;
 
-use BlockHorizons\BlockGenerator\biomes\impl\plains\PlainsBiome;
 use BlockHorizons\BlockGenerator\populator\DoublePlantPopulator;
 
-class SunflowerPlainsBiome extends PlainsBiome {
+class SunflowerPlainsBiome extends PlainsBiome
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
 
         $sunflower = new DoublePlantPopulator(0);
@@ -15,7 +17,8 @@ class SunflowerPlainsBiome extends PlainsBiome {
         $this->addPopulator($sunflower);
     }
 
-    public function getName() : string {
+    public function getName(): string
+    {
         return "Sunflower Plains";
     }
 }

@@ -1,11 +1,14 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\biomes\impl\taiga;
 
 use BlockHorizons\BlockGenerator\populator\SpruceBigTreePopulator;
 
-class MegaSpruceTaigaBiome extends MegaTaigaBiome {
+class MegaSpruceTaigaBiome extends MegaTaigaBiome
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
 
         $bigTrees = new SpruceBigTreePopulator();
@@ -14,7 +17,8 @@ class MegaSpruceTaigaBiome extends MegaTaigaBiome {
         $this->addPopulator($bigTrees);
     }
 
-    public function getName() : string {
+    public function getName(): string
+    {
         return "Mega Spruce Taiga";
     }
 }

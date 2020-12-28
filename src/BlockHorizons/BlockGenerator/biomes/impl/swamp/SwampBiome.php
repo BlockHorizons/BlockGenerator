@@ -1,4 +1,5 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\biomes\impl\swamp;
 
 use BlockHorizons\BlockGenerator\biomes\type\GrassyBiome;
@@ -10,9 +11,11 @@ use BlockHorizons\BlockGenerator\populator\tree\SwampTreePopulator;
 use pocketmine\block\Block;
 use pocketmine\block\Flower;
 
-class SwampBiome extends GrassyBiome {
+class SwampBiome extends GrassyBiome
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
 
         $lilypad = new LilyPadPopulator();
@@ -44,7 +47,8 @@ class SwampBiome extends GrassyBiome {
         $this->setHeightVariation(0.1);
     }
 
-    public function getName() : string {
+    public function getName(): string
+    {
         return "Swamp";
     }
 }

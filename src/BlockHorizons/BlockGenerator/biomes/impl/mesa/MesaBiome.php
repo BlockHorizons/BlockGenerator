@@ -1,4 +1,5 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\biomes\impl\mesa;
 
 use BlockHorizons\BlockGenerator\biomes\type\CoveredBiome;
@@ -7,37 +8,25 @@ use BlockHorizons\BlockGenerator\noise\SimplexF;
 use BlockHorizons\BlockGenerator\populator\CactusPopulator;
 use BlockHorizons\BlockGenerator\populator\DeadBushPopulator;
 use pocketmine\block\Block;
-use pocketmine\level\generator\noise\Simplex;
 use pocketmine\utils\Random;
 
-class MesaBiome extends CoveredBiome {
-    
-    protected $colorLayer = [];
-    protected $redSandNoise;
-    protected $colorNoise;
-    protected $moundNoise;
-
-    protected $moundHeight;
-
-    private function setRandomLayerColor(Random $random, int $sliceCount, int $color) : void {
-        for ($i = 0; $i < $random->nextBoundedInt(4) + $sliceCount; $i++) {
-            $j = $random->nextBoundedInt(count($this->colorLayer));
-            $k = 0;
-            while ($k < $random->nextBoundedInt(2) + 1 && $j < count($this->colorLayer)) {
-                $this->colorLayer[$j++] = $color;
-                $k++;
-            }
-        }
-    }
+class MesaBiome extends CoveredBiome
+{
 
     public $randY = 0;
     public $redSandThreshold = 0;
     public $isRedSand = false;
-    //cache this too so we can access it in getSurfaceBlock and getSurfaceMeta without needing to calculate it twice
     public $currMeta = 0;
     public $startY = 0;
+    protected $colorLayer = [];
+    protected $redSandNoise;
+    protected $colorNoise;
+    protected $moundNoise;
+    //cache this too so we can access it in getSurfaceBlock and getSurfaceMeta without needing to calculate it twice
+    protected $moundHeight;
 
-    public function __construct() {
+    public function __construct()
+    {
         $cactus = new CactusPopulator();
         $cactus->setBaseAmount(1);
         $cactus->setRandomAmount(1);
@@ -55,7 +44,7 @@ class MesaBiome extends CoveredBiome {
 
         $random = new CustomRandom(29864);
 
-        for($i = 0; $i < 64; $i++) {
+        for ($i = 0; $i < 64; $i++) {
             $this->colorLayer[$i] = -1;
         }
         $this->setRandomLayerColor($random, 14, 1); // orange
@@ -79,18 +68,38 @@ class MesaBiome extends CoveredBiome {
         $this->getHeightVariation(1.5);
     }
 
-    public function setMoundHeight(int $height) : void {
+    protected function getMoundFrequency(): float
+    {
+        return 1 / 128.0;
+    }
+
+    private function setRandomLayerColor(Random $random, int $sliceCount, int $color): void
+    {
+        for ($i = 0; $i < $random->nextBoundedInt(4) + $sliceCount; $i++) {
+            $j = $random->nextBoundedInt(count($this->colorLayer));
+            $k = 0;
+            while ($k < $random->nextBoundedInt(2) + 1 && $j < count($this->colorLayer)) {
+                $this->colorLayer[$j++] = $color;
+                $k++;
+            }
+        }
+    }
+
+    public function setMoundHeight(int $height): void
+    {
         $this->moundHeight = $height;
     }
 
-    public function getSurfaceDepth(int $y) : int {
+    public function getSurfaceDepth(int $y): int
+    {
         $this->isRedSand = $y < $this->redSandThreshold;
         $this->startY = $y;
         //if true, we'll be generating red sand
         return $this->isRedSand ? 3 : $y - 66;
     }
 
-    public function getSurfaceBlock(int $y) : int {
+    public function getSurfaceBlock(int $y): int
+    {
         if ($this->isRedSand) {
             return 12; // Hardcode
         } else {
@@ -99,7 +108,8 @@ class MesaBiome extends CoveredBiome {
         }
     }
 
-    public function getSurfaceMeta(int $y) : int {
+    public function getSurfaceMeta(int $y): int
+    {
         if ($this->isRedSand) {
             return 1; // Hardcode
         } else {
@@ -107,34 +117,36 @@ class MesaBiome extends CoveredBiome {
         }
     }
 
-    public function getGroundDepth(int $y) : int {
+    public function getGroundDepth(int $y): int
+    {
         return $this->isRedSand ? 2 : 0;
     }
 
-    public function getGroundBlock(int $y) : int {
+    public function getGroundBlock(int $y): int
+    {
         return Block::RED_SANDSTONE;
     }
 
-    public function getName() : string {
+    public function getName(): string
+    {
         return "Mesa";
     }
 
-    public function preCover(int $x, int $z) {
+    public function preCover(int $x, int $z)
+    {
         $this->randY = round(($this->colorNoise->noise2D($x, $z, true) + 1) * 1.5);
         $this->redSandThreshold = 71 + round(($this->redSandNoise->noise2D($x, $z, true) + 1) * 1.5);
     }
 
-    protected function getMoundFrequency() : float {
-        return 1 / 128.0;
-    }
-
-    public function getHeightOffset(int $x, int $z) : int {
+    public function getHeightOffset(int $x, int $z): int
+    {
         $n = $this->moundNoise->noise2D($x, $z, true);
         $a = self::minHill();
         return ($n > $a && $n < $a + 0.2) ? (int)(($n - $a) * 5 * $this->moundHeight) : ($n < $a + 0.1 ? 0 : $this->moundHeight);
     }
 
-    protected function minHill() : float {
+    protected function minHill(): float
+    {
         return -0.1;
     }
 }

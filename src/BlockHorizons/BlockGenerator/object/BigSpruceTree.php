@@ -1,4 +1,5 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\object;
 
 use BlockHorizons\BlockGenerator\populator\helper\PopulatorHelpers;
@@ -7,27 +8,26 @@ use pocketmine\level\ChunkManager;
 use pocketmine\level\generator\object\SpruceTree;
 use pocketmine\utils\Random;
 
-class BigSpruceTree extends SpruceTree {
-    
+class BigSpruceTree extends SpruceTree
+{
+
     /** @var int */
     private $leafStartHeightMultiplier;
     private $baseLeafRadius;
 
-    public function __construct(float $leafStartHeightMultiplier, int $baseLeafRadius) {
+    public function __construct(float $leafStartHeightMultiplier, int $baseLeafRadius)
+    {
         parent::__construct();
 
         $this->leafStartHeightMultiplier = $leafStartHeightMultiplier;
         $this->baseLeafRadius = $baseLeafRadius;
     }
 
-    public function canOverride(Block $block) : bool {
-        return isset($this->overridable[$block->getId()]);
-    }
-
-    public function placeObject(ChunkManager $level, int $x, int $y, int $z, Random $random) : void {
+    public function placeObject(ChunkManager $level, int $x, int $y, int $z, Random $random): void
+    {
         $this->treeHeight = $random->nextBoundedInt(15) + 20;
 
-        $topSize = $this->treeHeight - (int) ($this->treeHeight * $this->leafStartHeightMultiplier);
+        $topSize = $this->treeHeight - (int)($this->treeHeight * $this->leafStartHeightMultiplier);
         $lRadius = $this->baseLeafRadius + $random->nextBoundedInt(2);
 
         $this->placeTrunk($level, $x, $y, $z, $random, $this->treeHeight - $random->nextBoundedInt(3));
@@ -35,7 +35,8 @@ class BigSpruceTree extends SpruceTree {
         $this->placeLeaves($level, $topSize, $lRadius, $x, $y, $z, $random);
     }
 
-    protected function placeTrunk(ChunkManager $level, int $x, int $y, int $z, Random $random, int $trunkHeight) : void {
+    protected function placeTrunk(ChunkManager $level, int $x, int $y, int $z, Random $random, int $trunkHeight): void
+    {
         // The base dirt block
         $level->setBlockIdAt($x, $y - 1, $z, Block::DIRT);
         $radius = 2;
@@ -53,7 +54,13 @@ class BigSpruceTree extends SpruceTree {
         }
     }
 
-    public function placeLeaves(ChunkManager $level, int $topSize, int $lRadius, int $x, int $y, int $z, Random $random)  : void {
+    public function canOverride(Block $block): bool
+    {
+        return isset($this->overridable[$block->getId()]);
+    }
+
+    public function placeLeaves(ChunkManager $level, int $topSize, int $lRadius, int $x, int $y, int $z, Random $random): void
+    {
         $radius = $random->nextBoundedInt(2);
         $maxR = 1;
         $minR = 0;

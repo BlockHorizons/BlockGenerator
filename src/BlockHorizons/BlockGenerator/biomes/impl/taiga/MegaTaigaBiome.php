@@ -1,15 +1,15 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\biomes\impl\taiga;
 
-use BlockHorizons\BlockGenerator\biomes\type\GrassyBiome;
 use BlockHorizons\BlockGenerator\populator\SpruceBigTreePopulator;
-use BlockHorizons\BlockGenerator\populator\TreePopulator;
-use pocketmine\block\Block;
 
 
-class MegaTaigaBiome extends TaigaBiome {
+class MegaTaigaBiome extends TaigaBiome
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
 
         $bigTrees = new SpruceBigTreePopulator();
@@ -22,8 +22,9 @@ class MegaTaigaBiome extends TaigaBiome {
         $this->setHeightVariation(0.2);
     }
 
-    public function getName() : string {
+    public function getName(): string
+    {
         return "Mega Taiga";
     }
-    
+
 }

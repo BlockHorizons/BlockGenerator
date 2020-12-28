@@ -1,4 +1,5 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\populator\tree;
 
 use BlockHorizons\BlockGenerator\object\NewJungleTree;
@@ -7,9 +8,11 @@ use pocketmine\math\Vector3;
 use pocketmine\utils\Random;
 
 
-class JungleFloorPopulator extends JungleTreePopulator {
-    
-    public function populateCount(ChunkManager $level, int $chunkX, int $chunkZ, Random $random) : void {
+class JungleFloorPopulator extends JungleTreePopulator
+{
+
+    public function populateCount(ChunkManager $level, int $chunkX, int $chunkZ, Random $random): void
+    {
         $this->level = $level;
         $chunk = $level->getChunk($chunkX, $chunkZ);
         $amount = $random->nextBoundedInt($this->randomAmount + 1) + $this->baseAmount;

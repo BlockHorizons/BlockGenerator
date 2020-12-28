@@ -1,14 +1,17 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\biomes\impl\jungle;
 
+use BlockHorizons\BlockGenerator\biomes\type\GrassyBiome;
+use BlockHorizons\BlockGenerator\populator\MelonPopulator;
 use BlockHorizons\BlockGenerator\populator\tree\BigJungleTreePopulator;
 use BlockHorizons\BlockGenerator\populator\tree\JungleTreePopulator;
-use BlockHorizons\BlockGenerator\populator\MelonPopulator;
-use BlockHorizons\BlockGenerator\biomes\type\GrassyBiome;
 
-class JungleBiome extends GrassyBiome {
+class JungleBiome extends GrassyBiome
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
 
         $trees = new JungleTreePopulator();
@@ -25,7 +28,8 @@ class JungleBiome extends GrassyBiome {
         $this->addPopulator($melon);
     }
 
-    public function getName() : string {
+    public function getName(): string
+    {
         return "Jungle";
     }
 }
