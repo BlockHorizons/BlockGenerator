@@ -13,8 +13,8 @@ class MegaTaigaBiome extends TaigaBiome
         parent::__construct();
 
         $bigTrees = new SpruceBigTreePopulator();
-        $bigTrees->setBaseAmount(6);
-        $bigTrees->setRandomAmount(10);
+        $bigTrees->setBaseAmount(4);
+        $bigTrees->setRandomAmount(6);
 
         $this->addPopulator($bigTrees);
 

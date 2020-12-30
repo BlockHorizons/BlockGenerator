@@ -3,6 +3,7 @@
 namespace BlockHorizons\BlockGenerator\populator;
 
 use BlockHorizons\BlockGenerator\biomes\CustomBiome;
+use BlockHorizons\BlockGenerator\biomes\type\CoveredBiome;
 use BlockHorizons\BlockGenerator\math\CustomRandom;
 use pocketmine\block\Block;
 use pocketmine\level\ChunkManager;
@@ -13,11 +14,11 @@ use pocketmine\utils\Random;
 class CavePopulator extends Populator
 {
 
-public static $caveRarity = 99;
-public static $caveFrequency = 80;
+public static $caveRarity = 7;
+public static $caveFrequency = 40;
     public static $caveMinAltitude = 8;//7
         public static $caveMaxAltitude = 67;//40
-public static $individualCaveRarity = 1;
+public static $individualCaveRarity = 25;
     public static $caveSystemFrequency = 1;
         public static $caveSystemPocketChance = 0;//25
     public static $caveSystemPocketMinSize = 0;
@@ -28,23 +29,21 @@ public static $individualCaveRarity = 1;
     protected $worldLong1, $worldLong2;
     private $random;
 
-    public function __construct(Random $random)
-    {
-        $worldLong1 = $random->nextLong();
-        $worldLong2 = $random->nextLong();
-    }
-
     public function populate(ChunkManager $level, int $chunkX, int $chunkZ, Random $random): void
     {
-        $this->random = new CustomRandom($random->getSeed());
+        $this->random = new CustomRandom($level->getSeed());
 
+        $this->worldLong1 = $this->random->nextLong();
+        $this->worldLong2 = $this->random->nextLong();
         $chunk = $level->getChunk($chunkX, $chunkZ);
 
         $size = $this->checkAreaSize;
 
         for ($x = $chunkX - $size; $x <= $chunkX + $size; $x++) {
             for ($z = $chunkZ - $size; $z <= $chunkZ + $size; $z++) {
-                $this->random->setSeed($chunkX * $this->worldLong1 ^ $chunkZ * $this->worldLong2 ^ $random->getSeed());
+                $randomX = $x * $this->worldLong1;
+                $randomZ = $z * $this->worldLong2;
+                $this->random->setSeed($randomX ^ $randomZ ^ $level->getSeed());
                 $this->generateChunk($x, $z, $chunk);
             }
         }
@@ -60,10 +59,8 @@ public static $individualCaveRarity = 1;
         for ($j = 0; $j < $i; $j++) {
             $x = $chunkX * 16 + $this->random->nextBoundedInt(16);
 
-            $y = 0.00;
-
             if (self::$evenCaveDistribution) {
-                $y = self::numberInRange($random, self::$caveMinAltitude, self::$caveMaxAltitude);
+                $y = self::numberInRange($this->random, self::$caveMinAltitude, self::$caveMaxAltitude);
             } else {
                 $y = $this->random->nextBoundedInt($this->random->nextBoundedInt(self::$caveMaxAltitude - self::$caveMinAltitude + 1) + 1) + self::$caveMinAltitude;
             }
@@ -129,7 +126,7 @@ public static $individualCaveRarity = 1;
         $randomAngel = $localRandom->nextBoundedInt($maxAngle / 2) + $maxAngle / 4;
         $bigAngel = $localRandom->nextBoundedInt(6) == 0;
 
-        for ($angle = $angle; $angle < $maxAngle; $angle++) {
+        for (; $angle < $maxAngle; $angle++) {
             $offsetXZ = 1.5 + sin($angle * 3.141593 / $maxAngle) * $radius * 1.0;
             $offsetY = $offsetXZ * $scale;
 
@@ -161,7 +158,6 @@ public static $individualCaveRarity = 1;
             $ln = $localRandom->nextBoundedInt(4);
             if ((!$isLargeCave) && ($ln == 0)) {
                 continue;
-            } else {
             }
 
             // Check if distance to working point (x and z) too larger than working radius (maybe ??)
@@ -235,30 +231,24 @@ public static $individualCaveRarity = 1;
                             $modY = (($yy - 1) + 0.5 - $y) / $offsetY;
                             if (($modY > -0.7) && ($modX * $modX + $modY * $modY + $modZ * $modZ < 1.0)) {
                                 $biome = CustomBiome::getBiome($chunk->getBiomeId($xx, $zz));
-                                // if (!($biome instanceof CoveredBiome)) {
-                                //     continue;
-                                // }
+                                 if (!($biome instanceof CoveredBiome)) {
+                                     continue;
+                                 }
 
                                 $material = $chunk->getBlockId($xx, $yy, $zz);
                                 $materialAbove = $chunk->getBlockId($xx, $yy + 1, $zz);
                                 if ($material == Block::GRASS || $material == Block::MYCELIUM) {
                                     $grassFound = true;
                                 }
-                                //TODO: check this
-//								if (this.isSuitableBlock(material, materialAbove, biome))
-                                {
-                                    // $rx = $chunk->getX() << 4 | $chunk->getX() % 16;
-                                    // $rz = $chunk->getZ() << 4 | $chunk->getZ() % 16;
-                                    if ($yy - 1 < 10) {
-                                        $chunk->setBlock($xx, $yy, $zz, Block::LAVA);
-                                    } else {
-                                        $chunk->setBlock($xx, $yy, $zz, Block::AIR);
+                                if ($yy - 1 < 10) {
+                                    $chunk->setBlock($xx, $yy, $zz, Block::LAVA);
+                                } else {
+                                    $chunk->setBlock($xx, $yy, $zz, Block::AIR);
 
-                                        // If grass was just deleted, try to
-                                        // move it down
-                                        if ($grassFound && ($chunk->getBlockId($xx, $yy - 1, $zz) == Block::DIRT)) {
-                                            $chunk->setBlock($xx, $yy - 1, $zz, $biome->getSurfaceBlock($yy - 1));
-                                        }
+                                    // If grass was just deleted, try to
+                                    // move it down
+                                    if ($grassFound && ($chunk->getBlockId($xx, $yy - 1, $zz) == Block::DIRT)) {
+                                        $chunk->setBlock($xx, $yy - 1, $zz, $biome->getSurfaceBlock($yy - 1));
                                     }
                                 }
                             }

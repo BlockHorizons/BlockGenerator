@@ -26,7 +26,7 @@ class ForestBiome extends GrassyBiome
 
         if ($type == self::TYPE_NORMAL) {
             //normal forest biomes have both oak and birch trees
-            $trees = new TreePopulator(\pocketmine\block\Wood::OAK);
+            $trees = new TreePopulator(\pocketmine\block\Wood::BIRCH);
             $trees->setBaseAmount(3);
             $this->addPopulator($trees);
         }

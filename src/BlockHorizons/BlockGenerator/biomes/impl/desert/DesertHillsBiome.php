@@ -2,9 +2,7 @@
 
 namespace BlockHorizons\BlockGenerator\biomes\impl\desert;
 
-use BlockHorizons\BlockGenerator\biomes\type\SandyBiome;
-
-class DesertHillsBiome extends SandyBiome
+class DesertHillsBiome extends DesertBiome
 {
 
     public function __construct()

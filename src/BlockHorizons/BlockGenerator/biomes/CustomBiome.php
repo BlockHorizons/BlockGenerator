@@ -57,6 +57,7 @@ use BlockHorizons\BlockGenerator\biomes\impl\taiga\TaigaHillsBiome;
 use BlockHorizons\BlockGenerator\biomes\impl\taiga\TaigaMBiome;
 use pocketmine\level\biome\Biome;
 use pocketmine\level\biome\UnknownBiome;
+use SplFixedArray;
 
 
 abstract class CustomBiome extends Biome
@@ -125,10 +126,12 @@ abstract class CustomBiome extends Biome
         MESA_PLATEAU_F_M = 166,
         MESA_PLATEAU_M = 167,
         VOID = 127;
-    private static $customBiomes;
+
+    private static SplFixedArray $customBiomes;
+
     /** @var float */
-    protected $baseHeight = 0.1;
-    protected $heightVariation = 0.3;
+    protected float $baseHeight = 0.1;
+    protected float $heightVariation = 0.3;
 
     public function __construct()
     {
@@ -137,7 +140,7 @@ abstract class CustomBiome extends Biome
 
     public static function init(): void
     {
-        self::$customBiomes = new \SplFixedArray(self::MAX_BIOMES);
+        self::$customBiomes = new SplFixedArray(self::MAX_BIOMES);
 
         self::register(self::PLAINS, new PlainsBiome());
         self::register(self::BEACH, new BeachBiome());
@@ -214,6 +217,10 @@ abstract class CustomBiome extends Biome
     {
         self::$customBiomes[$id] = $biome;
         $biome->setId($id);
+    }
+
+    public static function getBiomes() : SplFixedArray {
+        return self::$customBiomes;
     }
 
     /**
