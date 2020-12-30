@@ -15,12 +15,16 @@ class CustomBiomeSelector extends BiomeSelector
     private $river;
     private $hills;
     private $rain;
+    /**
+     * @var Simplex
+     */
+    private Simplex $_temperature;
 
     public function __construct(Random $random)
     {
         parent::__construct($random);
 
-        $this->temperature = new Simplex($random, 2, 1 / 8, 1 / 2048);
+        $this->_temperature = new Simplex($random, 2, 1 / 8, 1 / 2048);
         $this->rain = new Simplex($random, 2, 1 / 8, 1 / 2048);
         $this->river = new Simplex($random, 6, 2 / 4, 1 / 1024);
         $this->ocean = new Simplex($random, 6, 2 / 4, 1 / 2048);
@@ -31,7 +35,7 @@ class CustomBiomeSelector extends BiomeSelector
     {
         $noiseOcean = $this->ocean->noise2D($x, $z, true);
         $noiseRiver = $this->river->noise2D($x, $z, true);
-        $temperature = $this->temperature->noise2D($x, $z, true);
+        $temperature = $this->_temperature->noise2D($x, $z, true);
         $rainfall = $this->rain->noise2D($x, $z, true);
         $hills = $this->hills->noise2D($x, $z, true);
 
@@ -63,8 +67,8 @@ class CustomBiomeSelector extends BiomeSelector
             } else {
                 if ($rainfall < 0.0) {
                     $biome = CustomBiome::OCEAN;
-                    //} elseif ($temperature < 0) {
-                    //    $biome = CustomBiome::FROZEN_OCEAN;
+//                } elseif ($temperature < 0) {
+//                    $biome = CustomBiome::FROZEN_OCEAN;
                 } else {
                     $biome = CustomBiome::DEEP_OCEAN;
                 }

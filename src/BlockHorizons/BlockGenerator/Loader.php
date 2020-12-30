@@ -30,7 +30,7 @@ class Loader extends PluginBase implements Listener
 
         @rmdir("worlds/rblock");
         GeneratorManager::addGenerator(BlockGenerator::class, "blockgen", true);
-        $this->getServer()->generateLevel("rblock", 1338, BlockGenerator::class, []);
+        $this->getServer()->generateLevel("rblock", 232323, BlockGenerator::class, []);
         $this->getServer()->loadLevel("rblock");
         $level = $this->getServer()->getLevelByName("rblock");
     }

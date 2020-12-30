@@ -1,4 +1,5 @@
 <?php
+
 namespace BlockHorizons\BlockGenerator\generators;
 
 use BlockHorizons\BlockGenerator\biomes\CustomBiome;
@@ -6,8 +7,6 @@ use BlockHorizons\BlockGenerator\biomes\CustomBiomeSelector;
 use BlockHorizons\BlockGenerator\math\CustomRandom;
 use BlockHorizons\BlockGenerator\math\MathHelper;
 use BlockHorizons\BlockGenerator\noise\NoiseGeneratorOctaves;
-use BlockHorizons\BlockGenerator\noise\PerlinF;
-use BlockHorizons\BlockGenerator\noise\PerlinNoiseGenerator;
 use BlockHorizons\BlockGenerator\populator\BedrockPopulator;
 use BlockHorizons\BlockGenerator\populator\CavePopulator;
 use BlockHorizons\BlockGenerator\populator\GroundCoverPopulator;
@@ -15,7 +14,6 @@ use BlockHorizons\BlockGenerator\populator\RavinesPopulator;
 use pocketmine\block\Block;
 use pocketmine\block\BlockIds;
 use pocketmine\block\Stone;
-use pocketmine\level\biome\Biome;
 use pocketmine\level\generator\biome\BiomeSelector;
 use pocketmine\level\generator\object\OreType;
 use pocketmine\level\generator\populator\Ore;
@@ -24,37 +22,34 @@ use pocketmine\math\Vector3;
 /**
  * BlockGenerator is improved default generator
  */
-class BlockGenerator extends CustomGenerator {
-
-	protected static $BIOME_WEIGHTS = [];
+class BlockGenerator extends CustomGenerator
+{
 
     const SEA_HEIGHT = 64;
+    protected static $BIOME_WEIGHTS = [];
+    /** @var NoiseGeneratorOctaves */
+    public $scaleNoise;
+    public $depthNoise;
+    protected $seaHeight = self::SEA_HEIGHT;
+    /** @var Populator[] */
+    private $populators = [];
+    /** @var Populator[] */
+    private $generationPopulators = [];
 
-	protected $seaHeight = self::SEA_HEIGHT;
+    /** @var BiomeSelector */
+    private $selector;
 
-	/** @var NoiseGeneratorOctaves */
-	public $scaleNoise;
-	public $depthNoise;
+    private $biomes = [];
+    private $depthRegion = [];
+    private $mainNoiseRegion = [];
+    private $minLimitRegion = [];
+    private $maxLimitRegion = [];
+    private $heightMap = [];
 
-	/** @var Populator[] */
-	private $populators = [];
-	/** @var Populator[] */
-	private $generationPopulators = [];
-
-	/** @var BiomeSelector */
-	private $selector;
-
-	private $biomes = [];
-	private $depthRegion = [];
-	private $mainNoiseRegion = [];
-	private $minLimitRegion = [];
-	private $maxLimitRegion = [];
-	private $heightMap = [];
-	
-	private $minLimitPerlinNoise = null;
-	private $maxLimitPerlinNoise = null;
-	private $mainPerlinNoise = null;
-	private $surfaceNoise = null;
+    private $minLimitPerlinNoise = null;
+    private $maxLimitPerlinNoise = null;
+    private $mainPerlinNoise = null;
+    private $surfaceNoise = null;
 
     private $settings = [];
 
@@ -68,17 +63,18 @@ class BlockGenerator extends CustomGenerator {
      */
     private $localSeed2;
 
-    public function __construct(array $options = []){
+    public function __construct(array $options = [])
+    {
 
-        $seed = 1337; // some arbitrary value ;/
+        $seed = 232323; // some arbitrary value ;/
         $this->settings = ["seed" => $seed];
         $this->seed = $this->settings["seed"];
         // wtf am I doing here ? ^ xD
         $this->settings["populate"] = true;
 
-		for ($i = -2; $i <= 2; ++$i) {
+        for ($i = -2; $i <= 2; ++$i) {
             for ($j = -2; $j <= 2; ++$j) {
-                self::$BIOME_WEIGHTS[$i + 2 + ($j + 2) * 5] = ((float) (10.0 / sqrt((float) ($i * $i + $j * $j) + 0.2)));
+                self::$BIOME_WEIGHTS[$i + 2 + ($j + 2) * 5] = ((float)(10.0 / sqrt((float)($i * $i + $j * $j) + 0.2)));
             }
         }
 
@@ -91,7 +87,7 @@ class BlockGenerator extends CustomGenerator {
         $this->random->setSeed($seed);
 
         $this->selector = new CustomBiomeSelector($this->random);
-
+//        $this->selector = new DebugBiomeSelector($this->random);
 
 
         $this->minLimitPerlinNoise = new NoiseGeneratorOctaves($this->random, 16);
@@ -100,7 +96,7 @@ class BlockGenerator extends CustomGenerator {
 
         $this->mainPerlinNoise = new NoiseGeneratorOctaves($this->random, 8);
 
-       //$this->surfaceNoise = new PerlinNoiseGenerator($this->random, 4);
+        //$this->surfaceNoise = new PerlinNoiseGenerator($this->random, 4);
 
         $this->scaleNoise = new NoiseGeneratorOctaves($this->random, 10);
 
@@ -118,17 +114,17 @@ class BlockGenerator extends CustomGenerator {
 
         $ores = new Ore();
         $ores->setOreTypes([
-                new OreType(Block::get(BlockIds::COAL_ORE), 20, 17, 0, 128),
-                new OreType(Block::get(BlockIds::IRON_ORE), 20, 9, 0, 64),
-                new OreType(Block::get(BlockIds::REDSTONE_ORE), 8, 8, 0, 16),
-                new OreType(Block::get(BlockIds::LAPIS_ORE), 1, 7, 0, 16),
-                new OreType(Block::get(BlockIds::GOLD_ORE), 2, 9, 0, 32),
-                new OreType(Block::get(BlockIds::DIAMOND_ORE), 1, 8, 0, 16),
-                new OreType(Block::get(BlockIds::DIRT), 10, 33, 0, 128),
-                new OreType(Block::get(BlockIds::GRAVEL), 8, 33, 0, 128),
-                new OreType(Block::get(BlockIds::STONE, Stone::GRANITE), 10, 33, 0, 80),
-                new OreType(Block::get(BlockIds::STONE, Stone::DIORITE), 10, 33, 0, 80),
-                new OreType(Block::get(BlockIds::STONE, Stone::ANDESITE), 10, 33, 0, 80)
+            new OreType(Block::get(BlockIds::COAL_ORE), 20, 17, 0, 128),
+            new OreType(Block::get(BlockIds::IRON_ORE), 20, 9, 0, 64),
+            new OreType(Block::get(BlockIds::REDSTONE_ORE), 8, 8, 0, 16),
+            new OreType(Block::get(BlockIds::LAPIS_ORE), 1, 7, 0, 16),
+            new OreType(Block::get(BlockIds::GOLD_ORE), 2, 9, 0, 32),
+            new OreType(Block::get(BlockIds::DIAMOND_ORE), 1, 8, 0, 16),
+            new OreType(Block::get(BlockIds::DIRT), 10, 33, 0, 128),
+            new OreType(Block::get(BlockIds::GRAVEL), 8, 33, 0, 128),
+            new OreType(Block::get(BlockIds::STONE, Stone::GRANITE), 10, 33, 0, 80),
+            new OreType(Block::get(BlockIds::STONE, Stone::DIORITE), 10, 33, 0, 80),
+            new OreType(Block::get(BlockIds::STONE, Stone::ANDESITE), 10, 33, 0, 80)
         ]);
         $this->populators[] = $ores;
 
@@ -136,16 +132,15 @@ class BlockGenerator extends CustomGenerator {
         $this->populators[] = $caves;
         $this->cavePop = $caves;
 
-        $ravines = new RavinesPopulator();
-        $this->populators[] = $ravines;
-        $this->ravinePop = $ravines;
-
-        $this->populators = [];
+//        $ravines = new RavinesPopulator();
+//        $this->populators[] = $ravines;
+//        $this->ravinePop = $ravines;
 
         CustomBiome::init();
-	}
-	
-	public function generateChunk(int $chunkX, int $chunkZ) : void {
+    }
+
+    public function generateChunk(int $chunkX, int $chunkZ): void
+    {
         $baseX = $chunkX << 4;
         $baseZ = $chunkZ << 4;
         $this->random->setSeed($chunkX * $this->localSeed1 ^ $chunkZ * $this->localSeed2 ^ $this->seed);
@@ -234,7 +229,6 @@ class BlockGenerator extends CustomGenerator {
                 }
 
 
-
                 ++$vertCounter;
 
                 $baseHeightClone = $baseHeightSum;
@@ -244,7 +238,7 @@ class BlockGenerator extends CustomGenerator {
                 $baseHeightFactor = 8.5 + $baseHeightClone * 4.0;
 
                 for ($ySeg = 0; $ySeg < 33; ++$ySeg) {
-                    $baseScale = ((float) $ySeg - $baseHeightFactor) * 12.0 * 128.0 / 256.0 / $heightVariationClone;
+                    $baseScale = ((float)$ySeg - $baseHeightFactor) * 12.0 * 128.0 / 256.0 / $heightVariationClone;
 
                     if ($baseScale < 0.0) {
                         $baseScale *= 4.0;
@@ -256,7 +250,7 @@ class BlockGenerator extends CustomGenerator {
                     $clamp = MathHelper::denormalizeClamp($minScaled, $maxScaled, $noiseScaled) - $baseScale;
 
                     if ($ySeg > 29) {
-                        $yScaled = ((float) ($ySeg - 29) / 3.0);
+                        $yScaled = ((float)($ySeg - 29) / 3.0);
                         $clamp = $clamp * (1.0 - $yScaled) + -10.0 * $yScaled;
                     }
 
@@ -339,36 +333,41 @@ class BlockGenerator extends CustomGenerator {
             // add posibility to exclude populator using $settings variable # TODO
             $populator->populate($this->level, $chunkX, $chunkZ, $this->random, $chunk);
         }
-	}
+    }
 
-	public function populateChunk(int $chunkX, int $chunkZ) : void {
-		$chunk = $this->level->getChunk($chunkX, $chunkZ);
+    public function populateChunk(int $chunkX, int $chunkZ): void
+    {
+        $chunk = $this->level->getChunk($chunkX, $chunkZ);
 
         $this->random->setSeed(0xdeadbeef ^ ($chunkX << 8) ^ $chunkZ ^ $this->seed);
 
         foreach ($this->populators as $populator) {
             $populator->populate($this->level, $chunkX, $chunkZ, $this->random, $chunk);
         }
-        
+
         $biome = CustomBiome::getBiome($chunk->getBiomeId(7, 7));
 
-        if($this->settings['populate'] === false) return;
+        if ($this->settings['populate'] === false) return;
         $biome->populateChunk($this->level, $chunkX, $chunkZ, $this->random);
-	}
+    }
 
-	public function getName() : string {
+    public function getName(): string
+    {
         return "BlockGenerator";
-	}
+    }
 
-	public function getSpawn() : Vector3 {
-		return new Vector3(0.5, 256, 0.5);
-	}
+    public function getSpawn(): Vector3
+    {
+        return new Vector3(0.5, 256, 0.5);
+    }
 
-    public function getSelector() : CustomBiomeSelector {
+    public function getSelector(): CustomBiomeSelector
+    {
         return $this->selector;
     }
 
-    public function getSettings() : array {
+    public function getSettings(): array
+    {
         return $this->settings;
     }
 

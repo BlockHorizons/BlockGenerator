@@ -13,7 +13,7 @@ class PlainsBiome extends GrassyBiome
     {
         parent::__construct();
 
-        $this->setBaseHeight(0.125);
+        $this->setBaseHeight(0.175);
         $this->setHeightVariation(0.05);
     }
 

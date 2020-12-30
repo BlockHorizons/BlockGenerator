@@ -38,7 +38,7 @@ class TreePopulator extends PopulatorCount
         switch ($this->type) {
             case \pocketmine\block\Wood::SPRUCE:
                 if ($this->super) {
-                    $tree = new BigSpruceTree(); // TODO: does normal API ?
+                    $tree = new BigSpruceTree(2, 8); // TODO: does normal API ?
                 } else {
                     $tree = new SpruceTree();
                 }

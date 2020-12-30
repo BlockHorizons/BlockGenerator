@@ -43,7 +43,7 @@ class RavinesPopulator extends Populator {
 
     public function populate(ChunkManager $level, int $chunkX, int $chunkZ, Random $random) : void {
         $this->random = new CustomRandom();
-        $this->random->setSeed($random->getSeed());
+        $this->random->setSeed($level->getSeed());
         $worldLong1 = $this->random->nextLong();
         $worldLong2 = $this->random->nextLong();
 
@@ -53,7 +53,7 @@ class RavinesPopulator extends Populator {
             for ($z = $chunkZ - $i; $z <= $chunkZ + $i; $z++) {
                 $l3 = $x * $worldLong1;
                 $l4 = $z * $worldLong2;
-                $this->random->setSeed($l3 ^ $l4 ^ $random->getSeed());
+                $this->random->setSeed($l3 ^ $l4 ^ $level->getSeed());
                 $this->generateChunk($chunkX, $chunkZ, $level->getChunk($chunkX, $chunkZ));
             }
     }
