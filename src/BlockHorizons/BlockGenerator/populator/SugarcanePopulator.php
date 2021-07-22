@@ -13,7 +13,7 @@ use pocketmine\utils\Random;
 
 class SugarcanePopulator extends SurfaceBlockPopulator {
 	
-	private function findWater(int $x, int $y, int $z, Chunk $chunk) : bool {
+    private function findWater(int $x, int $y, int $z, Chunk $chunk) : bool {
         $count = 0;
         for ($i = $x - 4; $i < ($x + 4); $i++) {
             for ($j = $z - 4; $j < ($z + 4); $j++) {
