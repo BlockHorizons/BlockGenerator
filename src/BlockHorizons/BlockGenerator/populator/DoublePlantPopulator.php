@@ -1,34 +1,41 @@
 <?php
+declare(strict_types=1);
+
 namespace BlockHorizons\BlockGenerator\populator;
 
-use BlockHorizons\BlockGenerator\populator\SurfaceBlockPopulator;
 use BlockHorizons\BlockGenerator\populator\helper\EnsureCover;
 use BlockHorizons\BlockGenerator\populator\helper\EnsureGrassBelow;
-use BlockHorizons\BlockGenerator\populator\helper\PopulatorHelpers;
 use pocketmine\block\Block;
-use pocketmine\block\BlockFactory;
-use pocketmine\level\format\Chunk;
+use pocketmine\block\DoublePlant;
 use pocketmine\utils\Random;
+use pocketmine\world\ChunkManager;
 
-class DoublePlantPopulator extends SurfaceBlockPopulator {
-	
-	private $type;
+class DoublePlantPopulator extends SurfaceBlockPopulator
+{
 
-    public function __construct(int $type)    {
-        $this->type = $type;
-    }
+	public function __construct(
+		protected DoublePlant $plant
+	)
+	{
+	}
 
-    protected function canStay(int $x, int $y, int $z, Chunk $chunk) : bool {
-        return EnsureCover::ensureCover($x, $y, $z, $chunk) && EnsureCover::ensureCover($x, $y + 1, $z, $chunk) && EnsureGrassBelow::ensureGrassBelow($x, $y, $z, $chunk);
-    }
+	protected function canStay(int $x, int $y, int $z, ChunkManager $world): bool
+	{
+		return EnsureCover::ensureCover($x, $y, $z, $world) && EnsureCover::ensureCover($x, $y + 1, $z, $world) && EnsureGrassBelow::ensureGrassBelow($x, $y, $z, $world);
+	}
 
-    protected function getBlockId(int $x, int $z, Random $random, Chunk $chunk) : int {
-        return Block::DOUBLE_PLANT;
-    }
+	protected function placeBlock(int $x, int $y, int $z, Block $block, ChunkManager $world, Random $random): void
+	{
+		if (!$block instanceof DoublePlant) {
+			return;
+		}
 
-    protected function placeBlock(int $x, int $y, int $z, int $id, Chunk $chunk, Random $random) : void {
-        $chunk->setBlock($x, $y, $z, $id, $this->type);
-        $chunk->setBlock($x, $y + 1, $z, $id, $this->type);
-    }
+		$world->setBlockAt($x, $y, $z, $block);
+		$world->setBlockAt($x, $y + 1, $z, (clone $block)->setTop(true));
+	}
 
+	protected function getBlock(int $x, int $z, Random $random, ChunkManager $world): DoublePlant
+	{
+		return $this->plant;
+	}
 }

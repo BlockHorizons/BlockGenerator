@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace BlockHorizons\BlockGenerator\biomes\impl\river;
 
@@ -7,17 +8,17 @@ use BlockHorizons\BlockGenerator\biomes\type\WateryBiome;
 class RiverBiome extends WateryBiome
 {
 
-    public function __construct()
-    {
-        parent::__construct();
+	public function __construct()
+	{
+		parent::__construct();
 
-        $this->setBaseHeight(-0.5);
-        $this->setHeightVariation(0);
-    }
+		$this->setBaseHeight(-0.5);
+		$this->setHeightVariation(0);
+	}
 
-    public function getName(): string
-    {
-        return "River";
-    }
+	public function getName(): string
+	{
+		return "River";
+	}
 
 }

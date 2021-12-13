@@ -1,36 +1,40 @@
 <?php
+declare(strict_types=1);
 
 namespace BlockHorizons\BlockGenerator\biomes\impl\beach;
 
 use BlockHorizons\BlockGenerator\biomes\type\SandyBiome;
 use BlockHorizons\BlockGenerator\populator\WaterIcePopulator;
 use pocketmine\block\Block;
+use pocketmine\block\VanillaBlocks;
 
 class ColdBeachBiome extends SandyBiome
 {
 
-    public function __construct()
-    {
-        $ice = new WaterIcePopulator();
-        $this->addPopulator($ice);
+	public function __construct()
+	{
+		parent::__construct();
 
-        $this->setBaseHeight(0);
-        $this->setHeightVariation(0.025);
-    }
+		$ice = new WaterIcePopulator();
+		$this->addPopulator($ice);
 
-    public function getCoverBlock(int $y): int
-    {
-        return Block::SNOW_LAYER << 4;
-    }
+		$this->setBaseHeight(0);
+		$this->setHeightVariation(0.025);
+	}
 
-    public function getName(): string
-    {
-        return "Cold Beach";
-    }
+	public function getCoverBlock(int $y): Block
+	{
+		return VanillaBlocks::SNOW_LAYER();
+	}
 
-    public function isFreezing(): bool
-    {
-        return true;
-    }
+	public function getName(): string
+	{
+		return "Cold Beach";
+	}
+
+	public function isFreezing(): bool
+	{
+		return true;
+	}
 
 }

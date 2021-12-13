@@ -1,21 +1,22 @@
 <?php
+declare(strict_types=1);
 
 namespace BlockHorizons\BlockGenerator\biomes\impl\desert;
 
 class DesertMBiome extends DesertBiome
 {
 
-    public function __construct()
-    {
-        parent::__construct();
+	public function __construct()
+	{
+		parent::__construct();
 
-        $this->setBaseHeight(0.225);
-        $this->setHeightVariation(0.25);
-    }
+		$this->setBaseHeight(0.225);
+		$this->setHeightVariation(0.25);
+	}
 
-    public function getName(): string
-    {
-        return "Desert M";
-    }
+	public function getName(): string
+	{
+		return "Desert M";
+	}
 
 }

@@ -11,22 +11,22 @@ trait Picasso
 {
 
 
-    public function makeMap(int $seed, int $radius = 500): void
-    {
-        make_map:
+	public function makeMap(int $seed, int $radius = 500): void
+	{
+		make_map:
 
-        $random = new CustomRandom($seed);
-        $selector = new CustomBiomeSelector($random);
+		$random = new CustomRandom($seed);
+		$selector = new CustomBiomeSelector($random);
 
-        $maker = new BiomeMapGenerator($selector);
-        $map = $maker->createMap(new Vector2(0, 0), $radius, 16);
+		$maker = new BiomeMapGenerator($selector);
+		$map = $maker->createMap(new Vector2(0, 0), $radius, 16);
 
-        if (extension_loaded("gd")) {
-            $image = $maker->createImageFromMap($map);
+		if (extension_loaded("gd")) {
+			$image = $maker->createImageFromMap($map);
 
-            if ($image) {
-                $fileName = $seed.mt_rand(0, 100).".jpg";
-				imagejpeg($image, $this->getDataFolder().$fileName);
+			if ($image) {
+				$fileName = $seed . mt_rand(0, 100) . ".jpg";
+				imagejpeg($image, $this->getDataFolder() . $fileName);
 				$this->getLogger()->notice("Image of the map saved(Seed: $seed)!");
 			} else {
 				$this->getLogger()->error("Failed to save map");

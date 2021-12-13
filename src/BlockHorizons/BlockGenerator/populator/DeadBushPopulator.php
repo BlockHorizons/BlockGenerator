@@ -1,20 +1,25 @@
 <?php
+declare(strict_types=1);
+
 namespace BlockHorizons\BlockGenerator\populator;
 
 use BlockHorizons\BlockGenerator\populator\helper\EnsureBelow;
 use BlockHorizons\BlockGenerator\populator\helper\EnsureCover;
 use pocketmine\block\Block;
-use pocketmine\level\format\Chunk;
+use pocketmine\block\VanillaBlocks;
 use pocketmine\utils\Random;
+use pocketmine\world\ChunkManager;
 
-class DeadBushPopulator extends SurfaceBlockPopulator {
+class DeadBushPopulator extends SurfaceBlockPopulator
+{
 
-    protected function canStay(int $x, int $y, int $z, Chunk $chunk) : bool {
-        return EnsureCover::ensureCover($x, $y, $z, $chunk) && EnsureBelow::ensureBelow($x, $y, $z, Block::SAND, $chunk);
-    }
+	protected function canStay(int $x, int $y, int $z, ChunkManager $world): bool
+	{
+		return EnsureCover::ensureCover($x, $y, $z, $world) && EnsureBelow::ensureBelow($x, $y, $z, VanillaBlocks::SAND(), $world);
+	}
 
-    protected function getBlockId(int $x, int $z, Random $random, Chunk $chunk) : int {
-        return Block::DEAD_BUSH;
-    }
-
+	protected function getBlock(int $x, int $z, Random $random, ChunkManager $world): Block
+	{
+		return VanillaBlocks::DEAD_BUSH();
+	}
 }

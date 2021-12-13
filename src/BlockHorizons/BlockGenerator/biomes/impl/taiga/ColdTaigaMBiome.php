@@ -1,19 +1,20 @@
 <?php
+declare(strict_types=1);
 
 namespace BlockHorizons\BlockGenerator\biomes\impl\taiga;
 
 
-class ColdTaigaMBiome extends TaigaBiome
+class ColdTaigaMBiome extends ColdTaigaBiome
 {
 
-    public function getName(): string
-    {
-        return "Cold Taiga M";
-    }
+	public function getName(): string
+	{
+		return "Cold Taiga M";
+	}
 
-    public function doesOverhand(): bool
-    {
-        return true;
-    }
+	public function doesOverhang(): bool
+	{
+		return true;
+	}
 
 }

@@ -11,14 +11,14 @@ use pocketmine\utils\Random;
 class MelonPopulator extends SurfaceBlockPopulator
 {
 
-    protected function canStay(int $x, int $y, int $z, Chunk $chunk): bool
-    {
-        return EnsureCover::ensureCover($x, $y, $z, $chunk) && EnsureGrassBelow::ensureGrassBelow($x, $y, $z, $chunk);
-    }
+	protected function canStay(int $x, int $y, int $z, Chunk $chunk): bool
+	{
+		return EnsureCover::ensureCover($x, $y, $z, $chunk) && EnsureGrassBelow::ensureGrassBelow($x, $y, $z, $chunk);
+	}
 
-    protected function getBlockId(int $x, int $z, Random $random, Chunk $chunk): int
-    {
-        return Block::MELON_BLOCK;
-    }
+	protected function getBlockId(int $x, int $z, Random $random, Chunk $chunk): int
+	{
+		return Block::MELON_BLOCK;
+	}
 
 }

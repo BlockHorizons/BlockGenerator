@@ -1,61 +1,64 @@
 <?php
+declare(strict_types=1);
+
 namespace BlockHorizons\BlockGenerator\populator;
 
 use BlockHorizons\BlockGenerator\populator\helper\EnsureBelow;
 use BlockHorizons\BlockGenerator\populator\helper\EnsureCover;
 use BlockHorizons\BlockGenerator\populator\helper\EnsureGrassBelow;
 use pocketmine\block\Block;
-use pocketmine\level\ChunkManager;
-use pocketmine\level\Level;
-use pocketmine\level\format\Chunk;
+use pocketmine\block\BlockLegacyIds;
+use pocketmine\block\VanillaBlocks;
 use pocketmine\math\Vector3;
 use pocketmine\utils\Random;
+use pocketmine\world\ChunkManager;
 
-class SugarcanePopulator extends SurfaceBlockPopulator {
-	
-	private function findWater(int $x, int $y, int $z, Chunk $chunk) : bool {
-        $count = 0;
-        for ($i = $x - 4; $i < ($x + 4); $i++) {
-            for ($j = $z - 4; $j < ($z + 4); $j++) {
-                if(!$i || !$j || $i > 15 || $j > 15) continue; // edge of chunk
-                $b = $chunk->getBlockId($i, $y, $j);
-                if ($b === Block::WATER || $b === Block::STILL_WATER) {
-                    $count++;
-                }
-                if ($count > 10) {
-                    return true;
-                }
-            }
-        }
-        return ($count > 10);
-    }
+class SugarcanePopulator extends SurfaceBlockPopulator
+{
 
-    protected function spread(int $x, int $y, int $z, ChunkManager $level) : ? Vector3 {
-        $i = 0;
-        $j = 0;
-        $chunk = $level->getChunk($x >> 4, $z >> 4);
+	protected function spread(int $x, int $y, int $z, ChunkManager $world): ?Vector3
+	{
+		$j = 0;
+		for ($i = -1; $i <= 1; $i++) {
+			for ($j = -1; $j <= 1; $j++) {
+				$y = $this->getHighestWorkableBlock($world, $x, $z);
+				if ($y < 0) break;
 
-        for($i = -1; $i <= 1; $i++) {
-            for($j = -1; $j <= 1; $j++) {
-                $y = $this->getHighestWorkableBlock($x, $z, $chunk);
-                if($y < 0) break;
+				if ($world->getBlockAt($x + $i, $y, $z + $j)->getId() !== BlockLegacyIds::SAND) {
+					break;
+				}
+			}
+		}
+		if ($y < 0) return null;
 
-                $id = $level->getBlockIdAt($x + $i, $y, $z + $j);
-                if($id === Block::SAND) break;
+		return new Vector3($x + $i, $y, $z + $j);
+	}
 
-            }
-        }
-        if($y < 0) return null;
+	protected function canStay(int $x, int $y, int $z, ChunkManager $world): bool
+	{
+		return EnsureCover::ensureCover($x, $y, $z, $world) && (EnsureGrassBelow::ensureGrassBelow($x, $y, $z, $world) || EnsureBelow::ensureBelow($x, $y, $z, VanillaBlocks::SAND(), $world)) && $this->findWater($x, $y - 1, $z, $world);
+	}
 
-        return new Vector3($x + $i, $y, $z + $j);
-    }
+	private function findWater(int $x, int $y, int $z, ChunkManager $world): bool
+	{
+		$count = 0;
+		for ($i = $x - 4; $i < ($x + 4); $i++) {
+			for ($j = $z - 4; $j < ($z + 4); $j++) {
+				if (!$i || !$j || $i > 15 || $j > 15) continue; // edge of chunk
+				$b = $world->getBlockAt($i, $y, $j)->getId();
+				if ($b === BlockLegacyIds::WATER || $b === BlockLegacyIds::STILL_WATER) {
+					$count++;
+				}
+				if ($count > 10) {
+					return true;
+				}
+			}
+		}
+		return ($count > 10);
+	}
 
-    protected function canStay(int $x, int $y, int $z, Chunk $chunk) : bool {
-        return EnsureCover::ensureCover($x, $y, $z, $chunk) && (EnsureGrassBelow::ensureGrassBelow($x, $y, $z, $chunk) || EnsureBelow::ensureBelow($x, $y, $z, Block::SAND, $chunk)) && $this->findWater($x, $y - 1, $z, $chunk);
-    }
-
-    protected function getBlockId(int $x, int $z, Random $random, Chunk $chunk) : int {
-        return Block::SUGARCANE_BLOCK;
-    }
-
+	protected function getBlock(int $x, int $z, Random $random, ChunkManager $world): Block
+	{
+		return VanillaBlocks::SUGARCANE();
+	}
 }

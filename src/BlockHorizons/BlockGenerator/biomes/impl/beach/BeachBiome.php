@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace BlockHorizons\BlockGenerator\biomes\impl\beach;
 
@@ -8,23 +9,23 @@ use BlockHorizons\BlockGenerator\populator\SugarcanePopulator;
 class BeachBiome extends SandyBiome
 {
 
-    public function __construct()
-    {
+	public function __construct()
+	{
+		parent::__construct();
 
-        $sugarcane = new SugarcanePopulator();
-        $sugarcane->setBaseAmount(8);
-        $sugarcane->setRandomAmount(5);
+		$sugarcane = new SugarcanePopulator();
+		$sugarcane->setBaseAmount(8);
+		$sugarcane->setRandomAmount(5);
 
-        $this->addPopulator($sugarcane);
+		$this->addPopulator($sugarcane);
 
-        $this->setBaseHeight(0.0);
-        $this->setHeightVariation(0.025);
-    }
+		$this->setBaseHeight(0.0);
+		$this->setHeightVariation(0.025);
+	}
 
-    public function getName(): string
-    {
-        return "Beach";
-
-    }
+	public function getName(): string
+	{
+		return "Beach";
+	}
 
 }

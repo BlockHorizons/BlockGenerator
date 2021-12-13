@@ -1,31 +1,35 @@
 <?php
+declare(strict_types=1);
 
 namespace BlockHorizons\BlockGenerator\biomes\impl\mushroom;
 
 use BlockHorizons\BlockGenerator\biomes\type\GrassyBiome;
-use BlockHorizons\BlockGenerator\populator\MushroomPopulator;
 use pocketmine\block\Block;
+use pocketmine\block\VanillaBlocks;
 
 class MushroomIslandBiome extends GrassyBiome
 {
 
-    public function __construct()
-    {
-        $mushroomPopulator = new MushroomPopulator();
-        $mushroomPopulator->setBaseAmount(1);
-        $this->addPopulator($mushroomPopulator);
+	public function __construct()
+	{
+		parent::__construct();
 
-        $this->setBaseHeight(0.2);
-        $this->setHeightVariation(0.3);
-    }
+		// TODo
+//		$mushroomPopulator = new MushroomPopulator();
+//		$mushroomPopulator->setBaseAmount(1);
+//		$this->addPopulator($mushroomPopulator);
 
-    public function getName(): string
-    {
-        return "Mushroom Island";
-    }
+		$this->setBaseHeight(0.2);
+		$this->setHeightVariation(0.3);
+	}
 
-    public function getSurfaceBlock(int $y): int
-    {
-        return Block::MYCELIUM;
-    }
+	public function getName(): string
+	{
+		return "Mushroom Island";
+	}
+
+	public function getSurfaceBlock(int $y): Block
+	{
+		return VanillaBlocks::MYCELIUM();
+	}
 }

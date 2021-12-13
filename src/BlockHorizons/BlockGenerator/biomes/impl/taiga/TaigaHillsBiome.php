@@ -1,23 +1,22 @@
 <?php
+declare(strict_types=1);
 
 namespace BlockHorizons\BlockGenerator\biomes\impl\taiga;
 
-use BlockHorizons\BlockGenerator\biomes\type\GrassyBiome;
 
-
-class TaigaHillsBiome extends GrassyBiome
+class TaigaHillsBiome extends TaigaBiome
 {
 
-    public function __construct()
-    {
-        parent::__construct();
+	public function __construct()
+	{
+		parent::__construct();
 
-        $this->setBaseHeight(0.25);
-        $this->setHeightVariation(0.8);
-    }
+		$this->setBaseHeight(0.25);
+		$this->setHeightVariation(0.8);
+	}
 
-    public function getName(): string
-    {
-        return "Taiga Hills";
-    }
+	public function getName(): string
+	{
+		return "Taiga Hills";
+	}
 }

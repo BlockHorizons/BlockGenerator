@@ -1,83 +1,87 @@
 <?php
+declare(strict_types=1);
+
 namespace BlockHorizons\BlockGenerator\populator;
 
 use BlockHorizons\BlockGenerator\biomes\CustomBiome;
 use BlockHorizons\BlockGenerator\biomes\type\CoveredBiome;
-use BlockHorizons\BlockGenerator\generators\BlockGenerator;
-use pocketmine\block\Block;
-use pocketmine\block\BlockFactory;
-use pocketmine\level\ChunkManager;
-use pocketmine\level\biome\Biome;
-use pocketmine\level\generator\populator\Populator;
+use pocketmine\block\VanillaBlocks;
 use pocketmine\utils\Random;
-use pocketmine\level\format\Chunk;
+use pocketmine\world\ChunkManager;
+use pocketmine\world\format\Chunk;
+use pocketmine\world\generator\populator\Populator;
 
 
-class GroundCoverPopulator extends Populator {
+class GroundCoverPopulator implements Populator
+{
 
-   const STONE = Block::STONE << 4;
+	public function populate(ChunkManager $world, int $chunkX, int $chunkZ, Random $random): void
+	{
+		$baseX = $chunkX * Chunk::EDGE_LENGTH;
+		$baseZ = $chunkZ * Chunk::EDGE_LENGTH;
+		$chunk = $world->getChunk($chunkX, $chunkZ);
 
-    public function populate(ChunkManager $level, int $chunkX, int $chunkZ, Random $random) : void {
-        $realX = $chunkX << 4;
-        $realZ = $chunkZ << 4;
-        $chunk = $level->getChunk($chunkX, $chunkZ);
-        for ($x = 0; $x < 16; ++$x) {
-            for ($z = 0; $z < 16; ++$z) {
-                $biome = CustomBiome::getBiome($chunk->getBiomeId($x, $z));
-                if ($biome instanceof CoveredBiome) {
-                    $biome->preCover($realX | $x, $realZ | $z);
+		for ($x = 0; $x < 16; ++$x) {
+			for ($z = 0; $z < 16; ++$z) {
+				$y = 254;
 
-                    $hasCovered = false;
-                    $realY = 0; // int
-                    for ($y = 254; $y > 32; $y--) {
-                        if ($chunk->getFullBlock($x, $y, $z) === self::STONE) {
-                            COVER:
-                            if (!$hasCovered) {
-                                if ($y >= BlockGenerator::SEA_HEIGHT) {
-                                    $coverBlock = self::fromFullBlock($biome->getCoverBlock($y), $chunk);
+				$biome = CustomBiome::getBiome($chunk->getBiomeId($x, $z));
+				$realX = $baseX + $x;
+				$realZ = $baseZ + $z;
 
-                                    if($coverBlock->getId() > 0) {
-                                        $chunk->setBlock($x, $y + 1, $z, $coverBlock->getId(), $coverBlock->getDamage());
-                                    }
-                                    $surfaceDepth = $biome->getSurfaceDepth($y);
-                                    for ($i = 0; $i < $surfaceDepth; $i++) {
-                                        $realY = $y - $i;
-                                        $surfaceBlock = self::fromFullBlock($biome->getSurfaceBlock($realY) << 4, $chunk);
-                                        if ($chunk->getFullBlock($x, $realY, $z) === self::STONE) {
-                                            $chunk->setBlock($x, $realY, $z, $surfaceBlock->getId(), $surfaceBlock->getDamage());
-                                        } else {
-                                            $y--; goto COVER; // FIXME
-                                        };
-                                    }
-                                    $y -= $surfaceDepth;
-                                }
-                                $groundDepth = $biome->getGroundDepth($y);
-                                for ($i = 0; $i < $groundDepth; $i++) {
-                                    $realY = $y - $i;
-                                    $groundBlock = self::fromFullBlock($biome->getGroundBlock($realY) << 4, $chunk);
-                                    if ($chunk->getFullBlock($x, $realY, $z) === self::STONE) {
-                                        $chunk->setBlock($x, $realY, $z, $groundBlock->getId(), $groundBlock->getDamage());
-                                    } else {
-                                        $y--; goto COVER;
-                                    }
-                                }
-                                    //don't take all of groundDepth away because we do y-- in the loop
-                                    $y -= $groundDepth - 1;
-                                }
-                                $hasCovered = true;
-                            } else {
-                            if ($hasCovered) {
-                                //reset it if this isn't a valid stone block (allows us to place ground cover on top and below overhangs)
-                                $hasCovered = false;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+				if ($biome instanceof CoveredBiome === false) {
+					continue;
+				}
+				$biome->preCover($baseX | $x, $baseZ | $z);
 
-    public static function fromFullBlock(int $fullState, Chunk $chunk) : Block{
-        return BlockFactory::get($fullState >> 4, $fullState & 0xf);
-    }
+				while (($y = $this->getNextStone($chunk, $x, $y, $z)) >= 0) {
+
+					if (($coverBlock = $biome->getCoverBlock($y))->getId() > 0) {
+						$world->setBlockAt($realX, $y + 1, $realZ, $coverBlock);
+					}
+					$maxSurfaceDepth = max(min(
+						$stoneDepth = $y - ($this->getNextAir($chunk, $x, $y, $z) - 1),
+						$biome->getSurfaceDepth($y)
+					), 0);
+
+					for ($i = 0; $i < $maxSurfaceDepth; $i++) {
+						$world->setBlockAt($realX, $realY = $y - $i, $realZ, $biome->getSurfaceBlock($realY));
+					}
+					$y -= $maxSurfaceDepth;
+
+					$remainingStones = $stoneDepth - $maxSurfaceDepth;
+					if ($remainingStones === 0) {
+						continue;
+					}
+
+					$maxGroundDepth = max(min(
+						$remainingStones,
+						$biome->getGroundDepth($y)
+					), 0);
+					for ($i = 0; $i < $maxGroundDepth; $i++) {
+						$world->setBlockAt($realX, $realY = $y - $i, $realZ, $biome->getGroundBlock($realY));
+					}
+
+					$y = $this->getNextAir($chunk, $x, $y - $maxGroundDepth, $z);
+				}
+			}
+		}
+	}
+
+	private function getNextStone(Chunk $chunk, int $x, int $y, int $z): int
+	{
+		for (; $y >= 0 && $chunk->getFullBlock($x, $y, $z) !== VanillaBlocks::STONE()->getFullId(); $y--) {
+			//
+		}
+		return $y;
+	}
+
+	private function getNextAir(Chunk $chunk, int $x, int $y, int $z): int
+	{
+		for (; $y >= 0 && $chunk->getFullBlock($x, $y, $z) !== VanillaBlocks::AIR()->getFullId(); $y--) {
+			//
+		}
+		return $y;
+	}
+
 }

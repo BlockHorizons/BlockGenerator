@@ -1,18 +1,19 @@
 <?php
+declare(strict_types=1);
 
 namespace BlockHorizons\BlockGenerator\biomes\impl\mesa;
 
 class MesaPlateauFMBiome extends MesaPlateauFBiome
 {
 
-    public function __construct()
-    {
-        parent::__construct();
-    }
+	public function __construct()
+	{
+		parent::__construct();
+	}
 
-    public function getName(): string
-    {
-        return "Mesa Plateau F M";
-    }
+	public function getName(): string
+	{
+		return "Mesa Plateau F M";
+	}
 
 }

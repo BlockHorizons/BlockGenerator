@@ -4,20 +4,21 @@ namespace BlockHorizons\BlockGenerator\generators;
 
 use BlockHorizons\BlockGenerator\biomes\CustomBiome;
 use BlockHorizons\BlockGenerator\biomes\CustomBiomeSelector;
+use BlockHorizons\BlockGenerator\biomes\type\CoveredBiome;
 use BlockHorizons\BlockGenerator\math\CustomRandom;
 use BlockHorizons\BlockGenerator\math\MathHelper;
 use BlockHorizons\BlockGenerator\noise\NoiseGeneratorOctaves;
 use BlockHorizons\BlockGenerator\populator\BedrockPopulator;
 use BlockHorizons\BlockGenerator\populator\CavePopulator;
 use BlockHorizons\BlockGenerator\populator\GroundCoverPopulator;
-use BlockHorizons\BlockGenerator\populator\RavinesPopulator;
-use pocketmine\block\Block;
-use pocketmine\block\BlockIds;
-use pocketmine\block\Stone;
-use pocketmine\level\generator\biome\BiomeSelector;
-use pocketmine\level\generator\object\OreType;
-use pocketmine\level\generator\populator\Ore;
+use JetBrains\PhpStorm\Pure;
+use pocketmine\block\VanillaBlocks;
 use pocketmine\math\Vector3;
+use pocketmine\world\ChunkManager;
+use pocketmine\world\format\Chunk;
+use pocketmine\world\generator\object\OreType;
+use pocketmine\world\generator\populator\Ore;
+use pocketmine\world\generator\populator\Populator;
 
 /**
  * BlockGenerator is improved default generator
@@ -25,351 +26,340 @@ use pocketmine\math\Vector3;
 class BlockGenerator extends CustomGenerator
 {
 
-    const SEA_HEIGHT = 64;
-    protected static $BIOME_WEIGHTS = [];
-    /** @var NoiseGeneratorOctaves */
-    public $scaleNoise;
-    public $depthNoise;
-    protected $seaHeight = self::SEA_HEIGHT;
-    /** @var Populator[] */
-    private $populators = [];
-    /** @var Populator[] */
-    private $generationPopulators = [];
+	public const SEA_HEIGHT = 64;
 
-    /** @var BiomeSelector */
-    private $selector;
+	protected static array $BIOME_WEIGHTS = [];
 
-    private $biomes = [];
-    private $depthRegion = [];
-    private $mainNoiseRegion = [];
-    private $minLimitRegion = [];
-    private $maxLimitRegion = [];
-    private $heightMap = [];
+	/** @var NoiseGeneratorOctaves */
+	public NoiseGeneratorOctaves $scaleNoise;
 
-    private $minLimitPerlinNoise = null;
-    private $maxLimitPerlinNoise = null;
-    private $mainPerlinNoise = null;
-    private $surfaceNoise = null;
+	public NoiseGeneratorOctaves $depthNoise;
 
-    private $settings = [];
+	protected int $seaHeight = self::SEA_HEIGHT;
 
-    private $seed = null;
-    /**
-     * @var float
-     */
-    private $localSeed1;
-    /**
-     * @var float
-     */
-    private $localSeed2;
+	/** @var Populator[] */
+	private array $populators = [];
 
-    public function __construct(array $options = [])
-    {
+	/** @var Populator[] */
+	private array $generationPopulators = [];
 
-        $seed = 232323; // some arbitrary value ;/
-        $this->settings = ["seed" => $seed];
-        $this->seed = $this->settings["seed"];
-        // wtf am I doing here ? ^ xD
-        $this->settings["populate"] = true;
+	private CustomBiomeSelector $selector;
 
-        for ($i = -2; $i <= 2; ++$i) {
-            for ($j = -2; $j <= 2; ++$j) {
-                self::$BIOME_WEIGHTS[$i + 2 + ($j + 2) * 5] = ((float)(10.0 / sqrt((float)($i * $i + $j * $j) + 0.2)));
-            }
-        }
+	private array $depthRegion = [];
+	private array $mainNoiseRegion = [];
+	private array $minLimitRegion = [];
+	private array $maxLimitRegion = [];
+	private array $heightMap = [];
 
-        $this->random = new CustomRandom($seed);
+	private NoiseGeneratorOctaves $minLimitPerlinNoise;
+	private NoiseGeneratorOctaves $maxLimitPerlinNoise;
+	private NoiseGeneratorOctaves $mainPerlinNoise;
 
-        $this->localSeed1 = $this->random->nextSignedFloat();
+	private float $localSeed1;
 
-        $this->localSeed2 = $this->random->nextSignedFloat();
+	private float $localSeed2;
 
-        $this->random->setSeed($seed);
+	public function __construct()
+	{
+		parent::__construct();
 
-        $this->selector = new CustomBiomeSelector($this->random);
-//        $this->selector = new DebugBiomeSelector($this->random);
+		$seed = 232323; // some arbitrary value ;/
+		$this->settings = ["seed" => $seed];
+		$this->seed = $this->settings["seed"];
+		// wtf am I doing here ? ^ xD
+		$this->settings["populate"] = true;
 
+		for ($i = -2; $i <= 2; ++$i) {
+			for ($j = -2; $j <= 2; ++$j) {
+				self::$BIOME_WEIGHTS[$i + 2 + ($j + 2) * 5] = (10.0 / sqrt((float)($i * $i + $j * $j) + 0.2));
+			}
+		}
 
-        $this->minLimitPerlinNoise = new NoiseGeneratorOctaves($this->random, 16);
+		$this->random = new CustomRandom($seed);
 
-        $this->maxLimitPerlinNoise = new NoiseGeneratorOctaves($this->random, 16);
+		$this->localSeed1 = $this->random->nextSignedFloat();
 
-        $this->mainPerlinNoise = new NoiseGeneratorOctaves($this->random, 8);
+		$this->localSeed2 = $this->random->nextSignedFloat();
 
-        //$this->surfaceNoise = new PerlinNoiseGenerator($this->random, 4);
+		$this->random->setSeed($seed);
 
-        $this->scaleNoise = new NoiseGeneratorOctaves($this->random, 10);
+		$this->selector = new CustomBiomeSelector($this->random);
 
-        $this->depthNoise = new NoiseGeneratorOctaves($this->random, 16);
+		$this->minLimitPerlinNoise = new NoiseGeneratorOctaves($this->random, 16);
 
+		$this->maxLimitPerlinNoise = new NoiseGeneratorOctaves($this->random, 16);
 
-        // TODO
-        //this should run before all other populators so that we don't do things like generate ground cover on bedrock or something
+		$this->mainPerlinNoise = new NoiseGeneratorOctaves($this->random, 8);
 
-        $cover = new GroundCoverPopulator();
-        $this->generationPopulators[] = $cover;
+		$this->scaleNoise = new NoiseGeneratorOctaves($this->random, 10);
 
-        $bedrock = new BedrockPopulator();
-        $this->generationPopulators[] = $bedrock;
+		$this->depthNoise = new NoiseGeneratorOctaves($this->random, 16);
 
-        $ores = new Ore();
-        $ores->setOreTypes([
-            new OreType(Block::get(BlockIds::COAL_ORE), 20, 17, 0, 128),
-            new OreType(Block::get(BlockIds::IRON_ORE), 20, 9, 0, 64),
-            new OreType(Block::get(BlockIds::REDSTONE_ORE), 8, 8, 0, 16),
-            new OreType(Block::get(BlockIds::LAPIS_ORE), 1, 7, 0, 16),
-            new OreType(Block::get(BlockIds::GOLD_ORE), 2, 9, 0, 32),
-            new OreType(Block::get(BlockIds::DIAMOND_ORE), 1, 8, 0, 16),
-            new OreType(Block::get(BlockIds::DIRT), 10, 33, 0, 128),
-            new OreType(Block::get(BlockIds::GRAVEL), 8, 33, 0, 128),
-            new OreType(Block::get(BlockIds::STONE, Stone::GRANITE), 10, 33, 0, 80),
-            new OreType(Block::get(BlockIds::STONE, Stone::DIORITE), 10, 33, 0, 80),
-            new OreType(Block::get(BlockIds::STONE, Stone::ANDESITE), 10, 33, 0, 80)
-        ]);
-        $this->populators[] = $ores;
+		$cover = new GroundCoverPopulator();
+		$this->generationPopulators[] = $cover;
 
-        $caves = new CavePopulator($this->random);
-        $this->populators[] = $caves;
-        $this->cavePop = $caves;
+		$bedrock = new BedrockPopulator();
+		$this->generationPopulators[] = $bedrock;
+
+		$ores = new Ore();
+		$stone = VanillaBlocks::STONE();
+		$ores->setOreTypes([
+			new OreType(VanillaBlocks::COAL_ORE(), $stone, 20, 17, 0, 128),
+			new OreType(VanillaBlocks::IRON_ORE(), $stone, 20, 9, 0, 64),
+			new OreType(VanillaBlocks::REDSTONE_ORE(), $stone, 8, 8, 0, 16),
+			new OreType(VanillaBlocks::LAPIS_LAZULI_ORE(), $stone, 1, 7, 0, 16),
+			new OreType(VanillaBlocks::GOLD_ORE(), $stone, 2, 9, 0, 32),
+			new OreType(VanillaBlocks::DIAMOND_ORE(), $stone, 1, 8, 0, 16),
+			new OreType(VanillaBlocks::DIRT(), $stone, 10, 33, 0, 128),
+			new OreType(VanillaBlocks::GRAVEL(), $stone, 8, 33, 0, 128),
+			new OreType(VanillaBlocks::GRANITE(), $stone, 10, 33, 0, 80),
+			new OreType(VanillaBlocks::DIORITE(), $stone, 10, 33, 0, 80),
+			new OreType(VanillaBlocks::ANDESITE(), $stone, 10, 33, 0, 80)
+		]);
+		$this->populators[] = $ores;
+
+//		$this->populators[] = new CavePopulator($this->seed);
 
 //        $ravines = new RavinesPopulator();
 //        $this->populators[] = $ravines;
 //        $this->ravinePop = $ravines;
+		CustomBiome::init();
+	}
 
-        CustomBiome::init();
-    }
+	public function generateChunk(ChunkManager $world, int $chunkX, int $chunkZ): void
+	{
+		$baseX = $chunkX * Chunk::EDGE_LENGTH;
+		$baseZ = $chunkZ * Chunk::EDGE_LENGTH;
+		$this->random->setSeed($chunkX * $this->localSeed1 ^ $chunkZ * $this->localSeed2 ^ $this->seed);
 
-    public function generateChunk(int $chunkX, int $chunkZ): void
-    {
-        $baseX = $chunkX << 4;
-        $baseZ = $chunkZ << 4;
-        $this->random->setSeed($chunkX * $this->localSeed1 ^ $chunkZ * $this->localSeed2 ^ $this->seed);
+		$chunk = $world->getChunk($chunkX, $chunkZ);
 
-        $chunk = $this->level->getChunk($chunkX, $chunkZ);
+		//generate base noise values
+		$depthRegion = $this->depthNoise->generateNoiseOctaves8($this->depthRegion, $chunkX * 4, $chunkZ * 4, 5, 5, 200.0, 200.0, 0.5);
 
-        //generate base noise values
-        $depthRegion = $this->depthNoise->generateNoiseOctaves8($this->depthRegion, $chunkX * 4, $chunkZ * 4, 5, 5, 200.0, 200.0, 0.5);
+		$this->depthRegion = $depthRegion;
 
-        $this->depthRegion = $depthRegion;
+		$mainNoiseRegion = $this->mainPerlinNoise->generateNoiseOctaves($this->mainNoiseRegion, $chunkX * 4, 0, $chunkZ * 4, 5, 33, 5, 684.412 / 60, 684.412 / 160, 684.412 / 60);
 
-        $mainNoiseRegion = $this->mainPerlinNoise->generateNoiseOctaves($this->mainNoiseRegion, $chunkX * 4, 0, $chunkZ * 4, 5, 33, 5, 684.412 / 60, 684.412 / 160, 684.412 / 60);
+		$this->mainNoiseRegion = $mainNoiseRegion;
 
-        $this->mainNoiseRegion = $mainNoiseRegion;
+		$minLimitRegion = $this->minLimitPerlinNoise->generateNoiseOctaves($this->minLimitRegion, $chunkX * 4, 0, $chunkZ * 4, 5, 33, 5, 684.412, 684.412, 684.412);
 
-        $minLimitRegion = $this->minLimitPerlinNoise->generateNoiseOctaves($this->minLimitRegion, $chunkX * 4, 0, $chunkZ * 4, 5, 33, 5, 684.412, 684.412, 684.412);
+		$this->minLimitRegion = $minLimitRegion;
 
-        $this->minLimitRegion = $minLimitRegion;
+		$maxLimitRegion = $this->maxLimitPerlinNoise->generateNoiseOctaves($this->maxLimitRegion, $chunkX * 4, 0, $chunkZ * 4, 5, 33, 5, 684.412, 684.412, 684.412);
 
-        $maxLimitRegion = $this->maxLimitPerlinNoise->generateNoiseOctaves($this->maxLimitRegion, $chunkX * 4, 0, $chunkZ * 4, 5, 33, 5, 684.412, 684.412, 684.412);
+		$this->maxLimitRegion = $maxLimitRegion;
 
-        $this->maxLimitRegion = $maxLimitRegion;
+		$heightMap = $this->heightMap;
 
-        $heightMap = $this->heightMap;
+		//generate heightmap and smooth biome heights
+		$horizCounter = 0;
+		$vertCounter = 0;
+		for ($xSeg = 0; $xSeg < 5; ++$xSeg) {
+			for ($zSeg = 0; $zSeg < 5; ++$zSeg) {
 
-        //generate heightmap and smooth biome heights
-        $horizCounter = 0;
-        $vertCounter = 0;
-        for ($xSeg = 0; $xSeg < 5; ++$xSeg) {
-            for ($zSeg = 0; $zSeg < 5; ++$zSeg) {
+				$heightVariationSum = 0.0;
+				$baseHeightSum = 0.0;
+				$biomeWeightSum = 0.0;
 
-                $heightVariationSum = 0.0;
-                $baseHeightSum = 0.0;
-                $biomeWeightSum = 0.0;
+				$biome = $this->getSelector()->pickBiome($baseX + ($xSeg * 4), $baseZ + ($zSeg * 4));
 
-                $biome = $this->selector->pickBiome($baseX + ($xSeg * 4), $baseZ + ($zSeg * 4));
+				for ($xSmooth = -2; $xSmooth <= 2; ++$xSmooth) {
+					for ($zSmooth = -2; $zSmooth <= 2; ++$zSmooth) {
 
-                for ($xSmooth = -2; $xSmooth <= 2; ++$xSmooth) {
-                    for ($zSmooth = -2; $zSmooth <= 2; ++$zSmooth) {
+						$biome1 = $this->getSelector()->pickBiome($baseX + ($xSeg * 4) + $xSmooth, $baseZ + ($zSeg * 4) + $zSmooth);
 
-                        $biome1 = $this->selector->pickBiome($baseX + ($xSeg * 4) + $xSmooth, $baseZ + ($zSeg * 4) + $zSmooth);
+						$baseHeight = $biome1->getBaseHeight();
+						$heightVariation = $biome1->getHeightVariation();
 
-                        $baseHeight = $biome1->getBaseHeight();
-                        $heightVariation = $biome1->getHeightVariation();
+						$scaledWeight = self::$BIOME_WEIGHTS[$xSmooth + 2 + ($zSmooth + 2) * 5] / ($baseHeight + 2.0);
 
-                        $scaledWeight = self::$BIOME_WEIGHTS[$xSmooth + 2 + ($zSmooth + 2) * 5] / ($baseHeight + 2.0);
+						if ($biome1->getBaseHeight() > $biome->getBaseHeight()) {
+							$scaledWeight /= 2.0;
+						}
 
-                        if ($biome1->getBaseHeight() > $biome->getBaseHeight()) {
-                            $scaledWeight /= 2.0;
-                        }
+						$heightVariationSum += $heightVariation * $scaledWeight;
+						$baseHeightSum += $baseHeight * $scaledWeight;
+						$biomeWeightSum += $scaledWeight;
+					}
+				}
 
-                        $heightVariationSum += $heightVariation * $scaledWeight;
-                        $baseHeightSum += $baseHeight * $scaledWeight;
-                        $biomeWeightSum += $scaledWeight;
+				$heightVariationSum = $heightVariationSum / $biomeWeightSum;
+				$baseHeightSum = $baseHeightSum / $biomeWeightSum;
+				$heightVariationSum = $heightVariationSum * 0.9 + 0.1;
+				$baseHeightSum = ($baseHeightSum * 4.0 - 1.0) / 8.0;
+				$depthNoise = $depthRegion[$vertCounter] / 8000.0;
 
-                    }
-                }
+				if ($depthNoise < 0.0) {
+					$depthNoise = -$depthNoise * 0.3;
+				}
 
-                $heightVariationSum = $heightVariationSum / $biomeWeightSum;
-                $baseHeightSum = $baseHeightSum / $biomeWeightSum;
-                $heightVariationSum = $heightVariationSum * 0.9 + 0.1;
-                $baseHeightSum = ($baseHeightSum * 4.0 - 1.0) / 8.0;
-                $depthNoise = $depthRegion[$vertCounter] / 8000.0;
+				$depthNoise = $depthNoise * 3.0 - 2.0;
 
-                if ($depthNoise < 0.0) {
-                    $depthNoise = -$depthNoise * 0.3;
-                }
+				if ($depthNoise < 0.0) {
+					$depthNoise = $depthNoise / 2.0;
 
-                $depthNoise = $depthNoise * 3.0 - 2.0;
+					if ($depthNoise < -1.0) {
+						$depthNoise = -1.0;
+					}
 
-                if ($depthNoise < 0.0) {
-                    $depthNoise = $depthNoise / 2.0;
+					$depthNoise = $depthNoise / 1.4;
+					$depthNoise = $depthNoise / 2.0;
+				} else {
+					if ($depthNoise > 1.0) {
+						$depthNoise = 1.0;
+					}
 
-                    if ($depthNoise < -1.0) {
-                        $depthNoise = -1.0;
-                    }
-
-                    $depthNoise = $depthNoise / 1.4;
-                    $depthNoise = $depthNoise / 2.0;
-                } else {
-                    if ($depthNoise > 1.0) {
-                        $depthNoise = 1.0;
-                    }
-
-                    $depthNoise = $depthNoise / 8.0;
-                }
+					$depthNoise = $depthNoise / 8.0;
+				}
 
 
-                ++$vertCounter;
+				++$vertCounter;
 
-                $baseHeightClone = $baseHeightSum;
-                $heightVariationClone = $heightVariationSum;
-                $baseHeightClone = $baseHeightClone + $depthNoise * 0.2;
-                $baseHeightClone = $baseHeightClone * 8.5 / 8.0;
-                $baseHeightFactor = 8.5 + $baseHeightClone * 4.0;
+				$baseHeightClone = $baseHeightSum;
+				$heightVariationClone = $heightVariationSum;
+				$baseHeightClone = $baseHeightClone + $depthNoise * 0.2;
+				$baseHeightClone = $baseHeightClone * 8.5 / 8.0;
+				$baseHeightFactor = 8.5 + $baseHeightClone * 4.0;
 
-                for ($ySeg = 0; $ySeg < 33; ++$ySeg) {
-                    $baseScale = ((float)$ySeg - $baseHeightFactor) * 12.0 * 128.0 / 256.0 / $heightVariationClone;
+				for ($ySeg = 0; $ySeg < 33; ++$ySeg) {
+					$baseScale = ((float)$ySeg - $baseHeightFactor) * 12.0 * 128.0 / 256.0 / $heightVariationClone;
 
-                    if ($baseScale < 0.0) {
-                        $baseScale *= 4.0;
-                    }
+					if ($baseScale < 0.0) {
+						$baseScale *= 4.0;
+					}
 
-                    $minScaled = $minLimitRegion[$horizCounter] / 512.0;
-                    $maxScaled = $maxLimitRegion[$horizCounter] / 512.0;
-                    $noiseScaled = ($mainNoiseRegion[$horizCounter] / 10.0 + 1.0) / 2.0;
-                    $clamp = MathHelper::denormalizeClamp($minScaled, $maxScaled, $noiseScaled) - $baseScale;
+					$minScaled = $minLimitRegion[$horizCounter] / 512.0;
+					$maxScaled = $maxLimitRegion[$horizCounter] / 512.0;
+					$noiseScaled = ($mainNoiseRegion[$horizCounter] / 10.0 + 1.0) / 2.0;
+					$clamp = MathHelper::denormalizeClamp($minScaled, $maxScaled, $noiseScaled) - $baseScale;
 
-                    if ($ySeg > 29) {
-                        $yScaled = ((float)($ySeg - 29) / 3.0);
-                        $clamp = $clamp * (1.0 - $yScaled) + -10.0 * $yScaled;
-                    }
+					if ($ySeg > 29) {
+						$yScaled = ((float)($ySeg - 29) / 3.0);
+						$clamp = $clamp * (1.0 - $yScaled) + -10.0 * $yScaled;
+					}
 
-                    $heightMap[$horizCounter] = $clamp;
+					$heightMap[$horizCounter] = $clamp;
 
-                    ++$horizCounter;
-                }
-            }
-        }
+					++$horizCounter;
+				}
+			}
+		}
 
-        //place blocks
-        for ($xSeg = 0; $xSeg < 4; ++$xSeg) {
+		//place blocks
+		for ($xSeg = 0; $xSeg < 4; ++$xSeg) {
 
-            $xScale = $xSeg * 5;
-            $xScaleEnd = ($xSeg + 1) * 5;
+			$xScale = $xSeg * 5;
+			$xScaleEnd = ($xSeg + 1) * 5;
 
-            for ($zSeg = 0; $zSeg < 4; ++$zSeg) {
-                $zScale1 = ($xScale + $zSeg) * 33;
-                $zScaleEnd1 = ($xScale + $zSeg + 1) * 33;
-                $zScale2 = ($xScaleEnd + $zSeg) * 33;
-                $zScaleEnd2 = ($xScaleEnd + $zSeg + 1) * 33;
+			for ($zSeg = 0; $zSeg < 4; ++$zSeg) {
+				$zScale1 = ($xScale + $zSeg) * 33;
+				$zScaleEnd1 = ($xScale + $zSeg + 1) * 33;
+				$zScale2 = ($xScaleEnd + $zSeg) * 33;
+				$zScaleEnd2 = ($xScaleEnd + $zSeg + 1) * 33;
 
-                for ($ySeg = 0; $ySeg < 32; ++$ySeg) {
-                    $height1 = $heightMap[$zScale1 + $ySeg];
-                    $height2 = $heightMap[$zScaleEnd1 + $ySeg];
-                    $height3 = $heightMap[$zScale2 + $ySeg];
-                    $height4 = $heightMap[$zScaleEnd2 + $ySeg];
-                    $height5 = ($heightMap[$zScale1 + $ySeg + 1] - $height1) * 0.125;
-                    $height6 = ($heightMap[$zScaleEnd1 + $ySeg + 1] - $height2) * 0.125;
-                    $height7 = ($heightMap[$zScale2 + $ySeg + 1] - $height3) * 0.125;
-                    $height8 = ($heightMap[$zScaleEnd2 + $ySeg + 1] - $height4) * 0.125;
+				for ($ySeg = 0; $ySeg < 32; ++$ySeg) {
+					$height1 = $heightMap[$zScale1 + $ySeg];
+					$height2 = $heightMap[$zScaleEnd1 + $ySeg];
+					$height3 = $heightMap[$zScale2 + $ySeg];
+					$height4 = $heightMap[$zScaleEnd2 + $ySeg];
+					$height5 = ($heightMap[$zScale1 + $ySeg + 1] - $height1) * 0.125;
+					$height6 = ($heightMap[$zScaleEnd1 + $ySeg + 1] - $height2) * 0.125;
+					$height7 = ($heightMap[$zScale2 + $ySeg + 1] - $height3) * 0.125;
+					$height8 = ($heightMap[$zScaleEnd2 + $ySeg + 1] - $height4) * 0.125;
 
-                    for ($yIn = 0; $yIn < 8; ++$yIn) {
+					for ($yIn = 0; $yIn < 8; ++$yIn) {
 
-                        $baseIncr = $height1;
-                        $baseIncr2 = $height2;
-                        $scaleY = ($height3 - $height1) * 0.25;
-                        $scaleY2 = ($height4 - $height2) * 0.25;
+						$baseIncr = $height1;
+						$baseIncr2 = $height2;
+						$scaleY = ($height3 - $height1) * 0.25;
+						$scaleY2 = ($height4 - $height2) * 0.25;
 
-                        for ($zIn = 0; $zIn < 4; ++$zIn) {
+						for ($zIn = 0; $zIn < 4; ++$zIn) {
 
-                            $scaleZ = ($baseIncr2 - $baseIncr) * 0.25;
-                            $scaleZ2 = $baseIncr - $scaleZ;
+							$scaleZ = ($baseIncr2 - $baseIncr) * 0.25;
+							$scaleZ2 = $baseIncr - $scaleZ;
 
-                            for ($xIn = 0; $xIn < 4; ++$xIn) {
-                                if (($scaleZ2 += $scaleZ) > 0.0) {
-                                    $chunk->setBlockId($xSeg * 4 + $zIn, $ySeg * 8 + $yIn, $zSeg * 4 + $xIn, Block::STONE);
-                                } elseif ($ySeg * 8 + $yIn <= $this->seaHeight) {
-                                    $chunk->setBlockId($xSeg * 4 + $zIn, $ySeg * 8 + $yIn, $zSeg * 4 + $xIn, Block::STILL_WATER);
-                                }
-                            }
+							for ($xIn = 0; $xIn < 4; ++$xIn) {
+								if (($scaleZ2 += $scaleZ) > 0.0) {
+									$chunk->setFullBlock(
+										x: $xSeg * 4 + $zIn,
+										y: $ySeg * 8 + $yIn,
+										z: $zSeg * 4 + $xIn,
+										block: ($biome instanceof CoveredBiome ? $biome->getStoneBlock() : VanillaBlocks::STONE())->getFullId());
+								} elseif ($ySeg * 8 + $yIn <= $this->seaHeight) {
+									$chunk->setFullBlock(
+										x: $xSeg * 4 + $zIn,
+										y: $ySeg * 8 + $yIn,
+										z: $zSeg * 4 + $xIn,
+										block: VanillaBlocks::WATER()->getFullId()
+									);
+								}
+							}
 
-                            $baseIncr += $scaleY;
-                            $baseIncr2 += $scaleY2;
-                        }
+							$baseIncr += $scaleY;
+							$baseIncr2 += $scaleY2;
+						}
 
-                        $height1 += $height5;
-                        $height2 += $height6;
-                        $height3 += $height7;
-                        $height4 += $height8;
-                    }
-                }
-            }
-        }
+						$height1 += $height5;
+						$height2 += $height6;
+						$height3 += $height7;
+						$height4 += $height8;
+					}
+				}
+			}
+		}
 
+		for ($x = 0; $x < 16; $x++) {
+			for ($z = 0; $z < 16; $z++) {
+				$biome = $this->getSelector()->pickBiome($baseX | $x, $baseZ | $z);
+				$chunk->setBiomeId($x, $z, $biome->getId());
+			}
+		}
 
-        for ($x = 0; $x < 16; $x++) {
-            for ($z = 0; $z < 16; $z++) {
-                $biome = $this->selector->pickBiome($baseX | $x, $baseZ | $z);
-                $chunk->setBiomeId($x, $z, $biome->getId());
-            }
-        }
+		foreach ($this->generationPopulators as $populator) {
+			$populator->populate($world, $chunkX, $chunkZ, $this->random);
+		}
+	}
 
-//        // DEBUG
-//        $this->cavePop->populate($this->level, $chunkX, $chunkZ, $this->random, $chunk);
-//        $this->ravinePop->populate($this->level, $chunkX, $chunkZ, $this->random, $chunk);
-//
-        //populate chunk
-        foreach ($this->generationPopulators as $populator) {
-            // add posibility to exclude populator using $settings variable # TODO
-            $populator->populate($this->level, $chunkX, $chunkZ, $this->random, $chunk);
-        }
-    }
+	public function populateChunk(ChunkManager $world, int $chunkX, int $chunkZ): void
+	{
+		$chunk = $world->getChunk($chunkX, $chunkZ);
 
-    public function populateChunk(int $chunkX, int $chunkZ): void
-    {
-        $chunk = $this->level->getChunk($chunkX, $chunkZ);
+		$this->random->setSeed(0xdeadbeef ^ ($chunkX << 8) ^ $chunkZ ^ $this->seed);
 
-        $this->random->setSeed(0xdeadbeef ^ ($chunkX << 8) ^ $chunkZ ^ $this->seed);
+		foreach ($this->populators as $populator) {
+			$populator->populate($world, $chunkX, $chunkZ, $this->random);
+		}
 
-        foreach ($this->populators as $populator) {
-            $populator->populate($this->level, $chunkX, $chunkZ, $this->random, $chunk);
-        }
+		$biome = CustomBiome::getBiome($chunk->getBiomeId(7, 7));
 
-        $biome = CustomBiome::getBiome($chunk->getBiomeId(7, 7));
+		if ($this->settings['populate'] === false) return;
 
-        if ($this->settings['populate'] === false) return;
-        $biome->populateChunk($this->level, $chunkX, $chunkZ, $this->random);
-    }
+		$biome->populateChunk($world, $chunkX, $chunkZ, $this->random);
+	}
 
-    public function getName(): string
-    {
-        return "BlockGenerator";
-    }
+	public function getName(): string
+	{
+		return "BlockGenerator";
+	}
 
-    public function getSpawn(): Vector3
-    {
-        return new Vector3(0.5, 256, 0.5);
-    }
+	#[Pure]
+	public function getSpawn(): Vector3
+	{
+		return new Vector3(0.5, 256, 0.5);
+	}
 
-    public function getSelector(): CustomBiomeSelector
-    {
-        return $this->selector;
-    }
+	public function getSelector(): CustomBiomeSelector
+	{
+		return $this->selector;
+	}
 
-    public function getSettings(): array
-    {
-        return $this->settings;
-    }
+	public function getSettings(): array
+	{
+		return $this->settings;
+	}
 
 
 }

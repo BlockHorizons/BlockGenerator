@@ -5,49 +5,40 @@ namespace BlockHorizons\BlockGenerator\populator;
 use BlockHorizons\BlockGenerator\populator\helper\EnsureCover;
 use BlockHorizons\BlockGenerator\populator\helper\EnsureGrassBelow;
 use pocketmine\block\Block;
-use pocketmine\block\BlockFactory;
-use pocketmine\level\format\Chunk;
+use pocketmine\block\DoublePlant;
+use pocketmine\block\VanillaBlocks;
 use pocketmine\utils\Random;
+use pocketmine\world\ChunkManager;
 
 class FlowerPopulator extends SurfaceBlockPopulator
 {
 
-    protected $flowerTypes = [];
+	/**
+	 * @var Block[]
+	 */
+	protected array $flowerTypes = [];
 
-    public function addType(int $a, int $b)
-    {
-        $c = [];
-        $c[0] = $a;
-        $c[1] = $b;
-        $this->flowerTypes[] = $c;
-    }
+	public function addType(Block $flower): void
+	{
+		$this->flowerTypes[] = $flower;
+	}
 
-    public function getTypes(): array
-    {
-        return $this->flowerTypes;
-    }
+	protected function placeBlock(int $x, int $y, int $z, Block $block, ChunkManager $world, Random $random): void
+	{
+		$world->setBlockAt($x, $y, $z, $block);
+		if ($block instanceof DoublePlant) {
+			$world->setBlockAt($x, $y + 1, $z, (clone $block)->setTop(true));
+		}
+	}
 
-    protected function placeBlock(int $x, int $y, int $z, int $id, Chunk $chunk, Random $random): void
-    {
-        if (count($this->flowerTypes) !== 0) {
-            $type = $this->flowerTypes[$random->nextRange(0, count($this->flowerTypes) - 1)];
+	protected function canStay(int $x, int $y, int $z, ChunkManager $world): bool
+	{
+		return EnsureCover::ensureCover($x, $y, $z, $world) && EnsureGrassBelow::ensureGrassBelow($x, $y, $z, $world);
+	}
 
-            $b = BlockFactory::get($type[0], $type[1]);
-            $chunk->setBlockId($x, $y, $z, $b->getId());
-            $chunk->setBlockData($x, $y, $z, $b->getVariant());
-            if ($type[0] === Block::DOUBLE_PLANT) {
-                $chunk->setBlock($x, $y + 1, $z, $b->getId(), $b->getVariant() | 0x08);
-            }
-        }
-    }
+	protected function getBlock(int $x, int $z, Random $random, ChunkManager $world): Block
+	{
+		return $this->flowerTypes[$random->nextRange(0, count($this->flowerTypes) - 1)] ?? VanillaBlocks::AIR();
+	}
 
-    protected function canStay(int $x, int $y, int $z, Chunk $chunk): bool
-    {
-        return EnsureCover::ensureCover($x, $y, $z, $chunk) && EnsureGrassBelow::ensureGrassBelow($x, $y, $z, $chunk);
-    }
-
-    protected function getBlockId(int $x, int $z, Random $random, Chunk $chunk): int
-    {
-        return 0;
-    }
 }
